@@ -1,0 +1,36 @@
+@use '@surstromming/design' as design;
+
+.size {
+  &-sm {
+    height: design.spacing(8);
+    padding-inline: design.spacing(3);
+    gap: design.spacing(1.5);
+
+    &:has(> svg) {
+      padding-inline: design.spacing(2.5);
+    }
+  }
+
+  &-md {
+    height: design.spacing(9);
+    padding-inline: design.spacing(4);
+
+    &:has(> svg) {
+      padding-inline: design.spacing(3);
+    }
+  }
+
+  &-lg {
+    height: design.spacing(10);
+    padding-inline: design.spacing(6);
+
+    &:has(> svg) {
+      padding-inline: design.spacing(4);
+    }
+  }
+
+  &-icon {
+    width: design.spacing(9);
+    height: design.spacing(9);
+  }
+}

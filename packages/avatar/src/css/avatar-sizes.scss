@@ -1,0 +1,21 @@
+@use '@surstromming/design' as design;
+
+.size {
+  &-sm {
+    width: design.spacing(8);
+    height: design.spacing(8);
+    font-size: 0.75rem;
+  }
+
+  &-md {
+    width: design.spacing(10);
+    height: design.spacing(10);
+    font-size: 0.875rem;
+  }
+
+  &-lg {
+    width: design.spacing(16);
+    height: design.spacing(16);
+    font-size: 1.25rem;
+  }
+}

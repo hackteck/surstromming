@@ -1,0 +1,19 @@
+@use '@surstromming/design' as design;
+
+// Heights mirror the button's, so a row of Input + Button lines up.
+.size {
+  &-sm {
+    height: design.spacing(8);
+    padding-inline: design.spacing(3);
+  }
+
+  &-md {
+    height: design.spacing(9);
+    padding-inline: design.spacing(3);
+  }
+
+  &-lg {
+    height: design.spacing(10);
+    padding-inline: design.spacing(4);
+  }
+}

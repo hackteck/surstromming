@@ -1,0 +1,23 @@
+@use 'sass:map';
+@use 'config';
+
+// Offsets from the one base radius, shadcn-style: md → radius - 2px.
+$radii: (
+  sm: -4px,
+  md: -2px,
+  lg: 0px,
+  xl: 4px,
+);
+
+// The only way to read a radius — an unknown name fails the build.
+@function radius($name) {
+  @if not map.has-key($radii, $name) {
+    @error "Unknown radius `#{$name}`, see $radii in radius.scss";
+  }
+  $base: var(--#{config.$prefix}radius, config.$base-radius);
+  $offset: map.get($radii, $name);
+  @if $offset == 0px {
+    @return $base;
+  }
+  @return calc(#{$base} + #{$offset});
+}

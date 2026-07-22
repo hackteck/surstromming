@@ -1,0 +1,49 @@
+{
+  "name": "@surstromming/scroll-area",
+  "version": "0.1.0",
+  "description": "A scroll container with an Edge-style overlay scrollbar.",
+  "license": "MIT",
+  "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
+  "homepage": "https://github.com/hackteck/surstromming/tree/main/packages/scroll-area#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hackteck/surstromming.git",
+    "directory": "packages/scroll-area"
+  },
+  "bugs": "https://github.com/hackteck/surstromming/issues",
+  "keywords": [
+    "vue",
+    "vue3",
+    "component-library",
+    "design-system",
+    "ui",
+    "scss",
+    "css-modules",
+    "shadcn",
+    "scroll-area"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.scss",
+    "**/*.css"
+  ],
+  "files": [
+    "src"
+  ],
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@surstromming/design": "^0.1.0",
+    "@surstromming/util": "^0.1.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

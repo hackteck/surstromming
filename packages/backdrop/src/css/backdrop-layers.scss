@@ -1,0 +1,18 @@
+@use '@surstromming/design' as design;
+
+// A scrim paints one step *under* the thing it dims, so these are `layer - 1` —
+// except `backdrop`, which is the ladder's own rung for a scrim with nothing on
+// top of it. Every value comes off the one ladder in zIndexes.scss.
+.layer {
+  &-backdrop {
+    z-index: design.z-index(backdrop);
+  }
+
+  &-sidebar {
+    z-index: calc(#{design.z-index(sidebar)} - 1);
+  }
+
+  &-modal {
+    z-index: calc(#{design.z-index(modal)} - 1);
+  }
+}

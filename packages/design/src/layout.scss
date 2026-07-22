@@ -1,0 +1,39 @@
+// App shell grid: direct `aside` / `header` / `main` children land in named
+// areas, so the app needs no wrapper elements. An absent child (no sidebar on
+// the route, drawer teleported away on mobile) collapses its `auto` track.
+// The shell is viewport-locked and only `main` scrolls — with the document as
+// the scroller, a sticky sidebar below a sticky header slides up by the
+// header's height before pinning.
+// $sidebarInset: the sidebar sits inside the shell, below a full-width
+// header; otherwise it runs full height with the header beside it.
+@mixin layout($selector: "#app", $sidebarInset: false) {
+  #{$selector} {
+    display: grid;
+    height: 100dvh;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto 1fr;
+
+    @if $sidebarInset {
+      grid-template-areas:
+        'header header'
+        'sidebar main';
+    } @else {
+      grid-template-areas:
+        'sidebar header'
+        'sidebar main';
+    }
+
+    > aside {
+      grid-area: sidebar;
+    }
+
+    > header {
+      grid-area: header;
+    }
+
+    > main {
+      grid-area: main;
+      overflow-y: auto;
+    }
+  }
+}

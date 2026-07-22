@@ -1,0 +1,18 @@
+@use 'sidebar-config' as config;
+
+// Desktop: in normal flow, collapses by width. Stretches to its grid area
+// but never past the viewport, so it fits below a full-width header and
+// sticks while long content scrolls.
+.panel {
+  position: sticky;
+  top: 0;
+  width: config.$sidebar-width;
+  max-height: 100svh;
+  overflow: hidden;
+  transition: width 0.2s ease, visibility 0.2s;
+
+  &:not(.isOpen) {
+    width: 0;
+    visibility: hidden; // out of tab order once closed
+  }
+}

@@ -1,0 +1,27 @@
+@use 'sidebar-config' as config;
+
+// Mobile: teleported to <body>, slides over the backdrop. Its rung on the
+// stacking ladder is declared in the SFC, next to the other layout-wide bits.
+.drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: config.$sidebar-width;
+  visibility: hidden;
+  transition: transform 0.2s ease, visibility 0.2s;
+
+  &.side-left {
+    left: 0;
+    transform: translateX(-100%);
+  }
+
+  &.side-right {
+    right: 0;
+    transform: translateX(100%);
+  }
+
+  &.isOpen {
+    transform: none;
+    visibility: visible;
+  }
+}

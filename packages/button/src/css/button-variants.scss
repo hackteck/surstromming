@@ -1,0 +1,114 @@
+@use '@surstromming/design' as design;
+
+.variant {
+  &-primary {
+    border: 1px solid transparent;
+    background-color: design.color(primary);
+    color: design.color(primary-foreground);
+
+    &:hover {
+      background-color: design.with-alpha(primary, 90%);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px design.with-alpha(ring, 50%);
+    }
+  }
+
+  &-secondary {
+    border: 1px solid transparent;
+    background-color: design.color(secondary);
+    color: design.color(secondary-foreground);
+
+    &:hover {
+      background-color: design.with-alpha(secondary, 80%);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px design.with-alpha(ring, 50%);
+    }
+  }
+
+  &-destructive {
+    border: 1px solid transparent;
+    background-color: design.color(destructive);
+    color: white; // shadcn keeps white on red in both themes
+
+    &:hover {
+      background-color: design.with-alpha(destructive, 90%);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px design.with-alpha(destructive, 20%);
+    }
+
+    #{design.$darkThemeSelector} & {
+      background-color: design.with-alpha(destructive, 60%);
+
+      &:hover {
+        background-color: design.with-alpha(destructive, 90%);
+      }
+
+      &:focus-visible {
+        box-shadow: 0 0 0 3px design.with-alpha(destructive, 40%);
+      }
+    }
+  }
+
+  &-outline {
+    border: 1px solid design.color(border);
+    background-color: design.color(background);
+    box-shadow: design.shadow(xs);
+
+    &:hover {
+      background-color: design.color(accent);
+      color: design.color(accent-foreground);
+    }
+
+    &:focus-visible {
+      box-shadow:
+        0 0 0 3px design.with-alpha(ring, 50%),
+        design.shadow(xs);
+    }
+
+    #{design.$darkThemeSelector} & {
+      border-color: design.color(input);
+      background-color: design.with-alpha(input, 30%);
+
+      &:hover {
+        background-color: design.with-alpha(input, 50%);
+      }
+    }
+  }
+
+  &-ghost {
+    border: 1px solid transparent;
+
+    &:hover {
+      background-color: design.color(accent);
+      color: design.color(accent-foreground);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px design.with-alpha(ring, 50%);
+    }
+
+    #{design.$darkThemeSelector} &:hover {
+      background-color: design.with-alpha(accent, 50%);
+    }
+  }
+
+  &-link {
+    border: 1px solid transparent;
+    color: design.color(primary);
+    text-underline-offset: 4px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px design.with-alpha(ring, 50%);
+    }
+  }
+}

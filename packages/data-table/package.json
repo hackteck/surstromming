@@ -1,0 +1,52 @@
+{
+  "name": "@surstromming/data-table",
+  "version": "0.1.0",
+  "description": "Table with sorting, pagination and row selection.",
+  "license": "MIT",
+  "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
+  "homepage": "https://github.com/hackteck/surstromming/tree/main/packages/data-table#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hackteck/surstromming.git",
+    "directory": "packages/data-table"
+  },
+  "bugs": "https://github.com/hackteck/surstromming/issues",
+  "keywords": [
+    "vue",
+    "vue3",
+    "component-library",
+    "design-system",
+    "ui",
+    "scss",
+    "css-modules",
+    "shadcn",
+    "data-table"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.scss",
+    "**/*.css"
+  ],
+  "files": [
+    "src"
+  ],
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@surstromming/checkbox": "^0.1.0",
+    "@surstromming/design": "^0.1.0",
+    "@surstromming/icon": "^0.1.0",
+    "@surstromming/pagination": "^0.1.0",
+    "@surstromming/table": "^0.1.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

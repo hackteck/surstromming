@@ -1,0 +1,5 @@
+// The fonts the design system loads — emits their @font-face rules. Imported
+// once by the app (main.ts). Kept separate from reset.scss so the reset carries
+// no @font-face and stays safe to inject into a shadow root
+// (custom-web-components). Add more @fontsource families here as needed.
+@use '@fontsource-variable/geist';

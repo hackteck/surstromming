@@ -1,0 +1,20 @@
+@use '@surstromming/design' as design;
+
+// The panel is teleported to <body>, so a class is the only thing that can
+// stack it — a `v-bind()` custom property would land on the trigger and never
+// reach the panel. Every value comes off the one ladder in zIndexes.scss.
+.layer {
+  &-popover {
+    z-index: design.z-index(popover);
+  }
+
+  // Clears a teleported sidebar drawer — its action menu.
+  &-menu {
+    z-index: design.z-index(menu);
+  }
+
+  // Clears a dialog, for a select opened inside one.
+  &-modal {
+    z-index: design.z-index(modal);
+  }
+}

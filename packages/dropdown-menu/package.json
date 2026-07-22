@@ -1,0 +1,50 @@
+{
+  "name": "@surstromming/dropdown-menu",
+  "version": "0.1.0",
+  "description": "A menu of actions anchored to a trigger.",
+  "license": "MIT",
+  "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
+  "homepage": "https://github.com/hackteck/surstromming/tree/main/packages/dropdown-menu#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hackteck/surstromming.git",
+    "directory": "packages/dropdown-menu"
+  },
+  "bugs": "https://github.com/hackteck/surstromming/issues",
+  "keywords": [
+    "vue",
+    "vue3",
+    "component-library",
+    "design-system",
+    "ui",
+    "scss",
+    "css-modules",
+    "shadcn",
+    "dropdown-menu"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.scss",
+    "**/*.css"
+  ],
+  "files": [
+    "src"
+  ],
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@surstromming/design": "^0.1.0",
+    "@surstromming/icon": "^0.1.0",
+    "@surstromming/popover": "^0.1.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

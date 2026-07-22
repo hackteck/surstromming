@@ -1,0 +1,46 @@
+@use '@surstromming/design' as design;
+
+// Metrics mirror Input's, so a Select and an Input line up in one row.
+.trigger {
+  @include design.field;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: design.spacing(2);
+  width: 100%;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  text-align: start;
+  cursor: pointer;
+
+  // The chevron is affordance, not content — it shouldn't compete with the value.
+  svg {
+    flex-shrink: 0;
+    color: design.color(muted-foreground);
+    pointer-events: none;
+  }
+
+  &:hover {
+    #{design.$darkThemeSelector} & {
+      background-color: design.with-alpha(input, 50%);
+    }
+  }
+}
+
+.size {
+  &-sm {
+    height: design.spacing(8);
+    padding-inline: design.spacing(3);
+  }
+
+  &-md {
+    height: design.spacing(9);
+    padding-inline: design.spacing(3);
+  }
+
+  &-lg {
+    height: design.spacing(10);
+    padding-inline: design.spacing(4);
+  }
+}

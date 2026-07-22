@@ -1,0 +1,46 @@
+{
+  "name": "@surstromming/design",
+  "version": "0.1.0",
+  "description": "Everything related to design system, including colors, typography, and spacing.",
+  "license": "MIT",
+  "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
+  "homepage": "https://github.com/hackteck/surstromming/tree/main/packages/design#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hackteck/surstromming.git",
+    "directory": "packages/design"
+  },
+  "bugs": "https://github.com/hackteck/surstromming/issues",
+  "keywords": [
+    "vue",
+    "vue3",
+    "component-library",
+    "design-system",
+    "ui",
+    "scss",
+    "css-modules",
+    "shadcn",
+    "design"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.scss",
+    "**/*.css"
+  ],
+  "files": [
+    "src"
+  ],
+  "exports": {
+    ".": "./src/index.scss",
+    "./index.scss": "./src/index.scss",
+    "./config.scss": "./src/config.scss",
+    "./font-list.scss": "./src/font-list.scss",
+    "./reset.scss": "./src/reset.scss"
+  },
+  "dependencies": {
+    "@fontsource-variable/geist": "^5.2.9"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

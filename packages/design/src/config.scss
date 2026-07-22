@@ -1,0 +1,14 @@
+// Namespaces every CSS custom property, e.g. 'ss-' → var(--ss-primary).
+$prefix: '';
+
+// Unit for spacing(): spacing(2) → 0.5rem.
+$base-spacing: 0.25rem;
+
+// Fallback for radius(): the --radius custom property overrides at runtime.
+$base-radius: 0.625rem;
+
+// Scopes a component's dark-theme overrides: #{design.$darkThemeSelector} & { … }.
+// !default so the custom-web-components (shadow DOM) build can swap it for
+// :host([data-theme='dark']) — an ancestor selector can't reach <html> from
+// inside a shadow root, but :host can once the theme is mirrored onto the host.
+$darkThemeSelector: "[data-theme='dark']" !default;

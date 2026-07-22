@@ -1,0 +1,7 @@
+@use '@surstromming/design' as design;
+
+// Panel/drawer width, shared by the SFC and its @use'd partials. A Sass value
+// in a file everyone @uses — not a CSS custom property: a var declared in the
+// SFC's own block isn't visible to @use'd partials, so the shared config file
+// is what lets them all read one value.
+$sidebar-width: design.spacing(64);

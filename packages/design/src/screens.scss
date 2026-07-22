@@ -1,0 +1,21 @@
+@use 'sass:map';
+
+$screens: (
+  sm: 640px,
+  md: 768px,
+  lg: 1024px,
+  xl: 1280px,
+  xxl: 1536px,
+);
+
+// Mobile-first: the wrapped styles apply from $screen and up.
+// The only way to use a breakpoint — an unknown name fails the build.
+// Plain values, no var(): media queries can't read custom properties.
+@mixin screen($screen) {
+  @if not map.has-key($screens, $screen) {
+    @error "Unknown screen `#{$screen}`, see $screens in screens.scss";
+  }
+  @media (min-width: map.get($screens, $screen)) {
+    @content;
+  }
+}

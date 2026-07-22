@@ -1,0 +1,119 @@
+@use '@surstromming/design' as design;
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: design.spacing(1);
+  padding: 0; // the reset zeroes margins, not the UA's list indent
+  list-style: none;
+}
+
+// The trailing control (chevron / '…') is positioned against the row.
+.item {
+  position: relative;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  gap: design.spacing(2);
+  width: 100%;
+  height: design.spacing(8);
+  border-radius: design.radius(md);
+  background-color: transparent;
+  padding: 0 design.spacing(2);
+  color: inherit;
+  font-size: 0.875rem;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    background-color: design.color(sidebar-accent);
+    color: design.color(sidebar-accent-foreground);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px design.color(sidebar-ring);
+  }
+
+  svg {
+    flex-shrink: 0;
+    color: design.color(muted-foreground);
+  }
+}
+
+// The current page: same paint as hover, held on.
+.button.isActive {
+  background-color: design.color(sidebar-accent);
+  color: design.color(sidebar-accent-foreground);
+  font-weight: 500;
+}
+
+// Room for the trailing control, so a long label never runs under it.
+.button.hasAction {
+  padding-inline-end: design.spacing(8);
+}
+
+.text {
+  flex: 1;
+  min-width: 0; // without it a flex item refuses to shrink below its text
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.action {
+  position: absolute;
+  top: design.spacing(1);
+  right: design.spacing(1);
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: design.spacing(6);
+  height: design.spacing(6);
+  border-radius: design.radius(sm);
+  background-color: transparent;
+  color: design.color(muted-foreground);
+  cursor: pointer;
+  outline: none;
+
+  &:hover {
+    background-color: design.color(sidebar-accent);
+    color: design.color(sidebar-accent-foreground);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px design.color(sidebar-ring);
+  }
+}
+
+// The action menu stays out of the way until the row is hovered — but a
+// keyboard user must still find it, and an open menu can't have its trigger
+// fade out from under the pointer.
+.onHover {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+
+  .item:hover &,
+  &:focus-visible,
+  &.isOpen {
+    opacity: 1;
+  }
+}
+
+.chevron {
+  transition: transform 0.2s ease;
+}
+
+.chevron.isExpanded {
+  transform: rotate(90deg);
+}

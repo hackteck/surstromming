@@ -1,0 +1,18 @@
+@use '@surstromming/design' as design;
+@use 'sidebar-config' as config;
+
+.content {
+  // Lands on the ScrollArea's own root — it *is* the column. `flex: 1` plus
+  // the panel's own height is what gives it something to bound itself by.
+  flex: 1;
+  min-height: 0;
+  width: config.$sidebar-width;
+
+  .side-left & {
+    border-right: 1px solid design.color(sidebar-border);
+  }
+
+  .side-right & {
+    border-left: 1px solid design.color(sidebar-border);
+  }
+}

@@ -1,0 +1,70 @@
+@use '@surstromming/design' as design;
+
+// Hover only applies when the badge is a link (`as="a"`) — a static badge is
+// not interactive, so it must not react to the pointer. `&:where(a)` matches
+// only when the root element is an anchor (Sass can't prepend `a` to `&`).
+.variant {
+  &-primary {
+    border: 1px solid transparent;
+    background-color: design.color(primary);
+    color: design.color(primary-foreground);
+
+    &:where(a):hover {
+      background-color: design.with-alpha(primary, 90%);
+    }
+  }
+
+  &-secondary {
+    border: 1px solid transparent;
+    background-color: design.color(secondary);
+    color: design.color(secondary-foreground);
+
+    &:where(a):hover {
+      background-color: design.with-alpha(secondary, 90%);
+    }
+  }
+
+  &-destructive {
+    border: 1px solid transparent;
+    background-color: design.color(destructive);
+    color: white; // shadcn keeps white on red in both themes
+
+    &:where(a):hover {
+      background-color: design.with-alpha(destructive, 90%);
+    }
+
+    #{design.$darkThemeSelector} & {
+      background-color: design.with-alpha(destructive, 60%);
+    }
+  }
+
+  &-outline {
+    border: 1px solid design.color(border);
+    color: design.color(foreground);
+
+    &:where(a):hover {
+      background-color: design.color(accent);
+      color: design.color(accent-foreground);
+    }
+  }
+
+  &-ghost {
+    border: 1px solid transparent;
+    color: design.color(foreground);
+
+    &:where(a):hover {
+      background-color: design.color(accent);
+      color: design.color(accent-foreground);
+    }
+  }
+
+  &-link {
+    border: 1px solid transparent;
+    color: design.color(primary);
+    text-underline-offset: 4px;
+
+    &:where(a):hover {
+      text-decoration: underline;
+    }
+  }
+}

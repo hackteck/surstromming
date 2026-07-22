@@ -1,0 +1,48 @@
+{
+  "name": "@surstromming/avatar",
+  "version": "0.1.0",
+  "description": "A user's picture, with initials as a fallback.",
+  "license": "MIT",
+  "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
+  "homepage": "https://github.com/hackteck/surstromming/tree/main/packages/avatar#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hackteck/surstromming.git",
+    "directory": "packages/avatar"
+  },
+  "bugs": "https://github.com/hackteck/surstromming/issues",
+  "keywords": [
+    "vue",
+    "vue3",
+    "component-library",
+    "design-system",
+    "ui",
+    "scss",
+    "css-modules",
+    "shadcn",
+    "avatar"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.scss",
+    "**/*.css"
+  ],
+  "files": [
+    "src"
+  ],
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@surstromming/design": "^0.1.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,20 @@
+// Font *loading* lives in font-list.scss — @fontsource emits @font-face CSS, and
+// this file is @use'd by every SFC style block (each compiles separately).
+@use 'sass:map';
+@use 'config';
+
+$fonts: (
+  sans: ('Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif),
+  // System monospace — no @font-face, so it needs no loading in font-list.scss.
+  mono: (ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace),
+);
+
+// A font stack, overridable at runtime via --font-<name> (the map value is the
+// fallback). Loading stays in font-list.scss: overriding the var to a family the
+// app hasn't loaded changes the stack but won't fetch it.
+@function font($name) {
+  @if not map.has-key($fonts, $name) {
+    @error "Unknown font `#{$name}`, see $fonts in fonts.scss";
+  }
+  @return var(--#{config.$prefix}font-#{$name}, #{map.get($fonts, $name)});
+}

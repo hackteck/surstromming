@@ -1,0 +1,50 @@
+@use 'colors';
+@use 'config';
+@use 'radius';
+@use 'shadows';
+
+// The shared surface of a text-entry control — Input, Textarea, and the
+// Select/Combobox triggers: border, background, focus ring, invalid and
+// disabled states. Metrics (height, padding, font-size) stay with the
+// component; only the look that must never drift lives here.
+@mixin field {
+  border: 1px solid colors.color(input);
+  border-radius: radius.radius(md);
+  background-color: transparent;
+  box-shadow: shadows.shadow(xs);
+  outline: none;
+  transition:
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  // The ring is the first shadow layer; the ambient one stays behind it.
+  &:focus-visible {
+    border-color: colors.color(ring);
+    box-shadow:
+      0 0 0 3px colors.with-alpha(ring, 50%),
+      shadows.shadow(xs);
+  }
+
+  // After :focus-visible on purpose: an invalid focused field keeps the red ring.
+  &[aria-invalid='true'] {
+    border-color: colors.color(destructive);
+    box-shadow:
+      0 0 0 3px colors.with-alpha(destructive, 20%),
+      shadows.shadow(xs);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  #{config.$darkThemeSelector} & {
+    background-color: colors.with-alpha(input, 30%);
+
+    &[aria-invalid='true'] {
+      box-shadow:
+        0 0 0 3px colors.with-alpha(destructive, 40%),
+        shadows.shadow(xs);
+    }
+  }
+}

@@ -1,0 +1,61 @@
+@use '@surstromming/design' as design;
+
+// The row collapses to 0fr and expands to 1fr — the nested list keeps its
+// natural height, so nothing has to be measured in JS.
+.sub {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s ease;
+}
+
+.sub.isExpanded {
+  grid-template-rows: 1fr;
+}
+
+.subInner {
+  overflow: hidden; // required: a grid item won't shrink below its content without it
+}
+
+.subList {
+  display: flex;
+  flex-direction: column;
+  gap: design.spacing(1);
+  margin: design.spacing(1) 0 design.spacing(1) design.spacing(3.5);
+  border-inline-start: 1px solid design.color(sidebar-border);
+  padding-inline-start: design.spacing(2.5);
+  list-style: none;
+}
+
+.subButton {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: design.spacing(7);
+  border-radius: design.radius(md);
+  background-color: transparent;
+  padding: 0 design.spacing(2);
+  color: design.with-alpha(sidebar-foreground, 70%);
+  font-size: 0.875rem;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    background-color: design.color(sidebar-accent);
+    color: design.color(sidebar-accent-foreground);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px design.color(sidebar-ring);
+  }
+}
+
+.subButton.isActive {
+  background-color: design.color(sidebar-accent);
+  color: design.color(sidebar-accent-foreground);
+}

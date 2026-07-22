@@ -1,0 +1,31 @@
+@use '@surstromming/design' as design;
+
+.list {
+  margin: 0;
+  padding: design.spacing(1);
+  list-style: none;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: design.spacing(2);
+  border-radius: design.radius(sm);
+  padding: design.spacing(2);
+  font-size: 0.875rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+// Pointer and keyboard share one highlight — the active option is the one
+// Enter would pick, whether the mouse or the arrow keys put it there.
+.isActive {
+  background-color: design.color(accent);
+  color: design.color(accent-foreground);
+}
+
+.isDisabled {
+  pointer-events: none;
+  opacity: 0.5;
+}

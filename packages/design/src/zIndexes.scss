@@ -1,0 +1,34 @@
+@use 'sass:map';
+@use 'config';
+
+// ─── The z-index ladder ──────────────────────────────────────────────────────
+// One place to see how the overlays stack: higher wins. Every component reads
+// it through `z-index()` — no number lives in TS — and any rung is overridable
+// at runtime via --z-<name>. A fixed-layer overlay (Header, Tooltip, Dialog,
+// Sidebar's drawer, Toaster) simply declares its rung; where the layer varies,
+// the prop is a **name** selecting a `.layer-<name>` class (`layer` on
+// Popover/DropdownMenu and on Backdrop), never a number.
+//
+// A layered overlay puts its scrim one step under its surface (`layer - 1`), so
+// only whole layers live here, never the in-between scrim values (a Dialog at
+// `modal` renders its Backdrop at `modal - 1`; the Sidebar drawer at `sidebar`
+// renders its scrim at `sidebar - 1`).
+$z-layers: (
+  header:   20,   // sticky app header — below overlays, above page content
+  popover:  30,   // anchored panels in the content flow: Select, Combobox, DropdownMenu
+  backdrop: 40,   // the Backdrop component on its own
+  sidebar:  50,   // Sidebar drawer panel (its scrim sits at 49)
+  menu:     60,   // teleported menus that must clear the sidebar (its action menu)
+  modal:    70,   // Dialog panel (its scrim sits at 69, so it covers the app chrome)
+  toast:    80,   // transient toasts — above a modal
+  tooltip:  90,   // always on top, even over a dialog's own controls
+);
+
+// The only way to read a z-index — an unknown layer fails the build. Overridable
+// via --z-<name> (the ladder value is the fallback).
+@function z-index($name) {
+  @if not map.has-key($z-layers, $name) {
+    @error "Unknown z-index layer `#{$name}`, see $z-layers in zIndexes.scss";
+  }
+  @return var(--#{config.$prefix}z-#{$name}, #{map.get($z-layers, $name)});
+}

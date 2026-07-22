@@ -1,0 +1,59 @@
+@use '@surstromming/design' as design;
+
+// solid: a segmented control — muted trough, the active tab a raised pill.
+.variant-solid {
+  border-radius: design.radius(lg);
+  background-color: design.color(muted);
+  padding: 3px;
+
+  .tab {
+    border: 1px solid transparent; // only the active tab colors it in dark
+    border-radius: design.radius(md);
+  }
+
+  .isActive {
+    background-color: design.color(background);
+    color: design.color(foreground);
+    box-shadow: design.shadow(sm);
+
+    // A `background` pill is invisible against `muted` in dark — give it edges.
+    #{design.$darkThemeSelector} & {
+      border-color: design.color(input);
+      background-color: design.with-alpha(input, 30%);
+    }
+  }
+}
+
+// line: an underline (a side-line when vertical) under the active tab, no trough.
+.variant-line {
+  gap: design.spacing(1);
+
+  .tab {
+    border-radius: design.radius(sm);
+  }
+
+  .isActive {
+    color: design.color(foreground);
+
+    &::after {
+      content: '';
+      position: absolute;
+      background-color: design.color(primary);
+    }
+  }
+}
+
+// The line sits on the edge nearest the panel: below for a row, beside for a column.
+.orientation-horizontal .variant-line .isActive::after {
+  right: 0;
+  bottom: -3px;
+  left: 0;
+  height: 2px;
+}
+
+.orientation-vertical .variant-line .isActive::after {
+  top: 0;
+  right: -3px;
+  bottom: 0;
+  width: 2px;
+}
