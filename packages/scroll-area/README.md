@@ -14,8 +14,10 @@ Only the *painting* is ours. The element is a real scroll container, so the
 wheel, trackpad, keyboard, `scrollIntoView` and anchor links keep working
 untouched.
 
-Vertical only — a horizontal bar would double every measurement for a case this
-library doesn't have yet.
+**Both axes by default**, one bar each, and each bar is there only while its own
+axis overflows. `orientation` narrows that — `vertical` or `horizontal` forbids
+the other axis outright — so you reach for it to *stop* something scrolling, not
+to ask for a bar.
 
 ## Dependency graph
 
@@ -53,12 +55,42 @@ const lines = Array.from({ length: 60 }, (_, index) => `Line ${index + 1}`)
 </style>
 ```
 
+Sideways is the same component with no height given to it — the content's own
+width is what overflows, and the bar's row is all the height it adds:
+
+```vue
+<ScrollArea>
+  <div :class="$style.row">
+    <article v-for="card in cards" :key="card.id" :class="$style.card">…</article>
+  </div>
+</ScrollArea>
+```
+
+The children have to be laid out so they *can't* wrap — a flex row of
+`flex: 0 0 auto` items, or a grid of fixed columns. Nothing here forces that,
+and content that wraps has nothing to scroll sideways.
+
+`orientation` only comes up when an axis must be shut off rather than scrolled:
+
+```vue
+<!-- Long lines are cut, never scrolled; the list still scrolls down. -->
+<ScrollArea orientation="vertical" :class="$style.box">…</ScrollArea>
+```
+
 ## Props
 
-| Prop       | Type      | Default | Notes                                                |
-| ---------- | --------- | ------- | ---------------------------------------------------- |
-| `as`       | `string`  | `'div'` | Root element — `main` makes the page the scroller    |
-| `autoHide` | `boolean` | `false` | Float over the content and fade out when idle         |
+| Prop          | Type                                   | Default  | Notes                                             |
+| ------------- | -------------------------------------- | -------- | ------------------------------------------------- |
+| `as`          | `string`                               | `'div'`  | Root element — `main` makes the page the scroller |
+| `orientation` | `'vertical' \| 'horizontal' \| 'both'` | `'both'` | Which axes *may* scroll                           |
+| `autoHide`    | `boolean`                              | `false`  | Float over the content and fade out when idle     |
+
+`orientation` is what the viewport's `overflow` is set from, both axes always
+stated: leaving one `visible` makes the browser promote it to `auto`, and an
+axis that scrolls without a bar of ours scrolls behind the hidden native one
+instead. So `vertical` really does clip sideways, and `horizontal` clips
+vertically — that's the whole reason to pass either. On the default, whichever
+axes overflow get a bar, and two bars stop short of the corner the other takes.
 
 `autoHide` also drops the gutter — a bar that comes and goes can't reserve
 space without the layout jumping — and gives the bar a `background` wash at 85%,
@@ -74,6 +106,8 @@ since it now paints over whatever it covers.
 
 `class`, `style` and listeners land on the root — that's where you set the
 height. The scrolling element is a private inner `div`.
+
+Leave `display` alone, though: the root's grid is what places the bars.
 
 ## Where it's used
 
@@ -92,8 +126,9 @@ chrome:
 | [`Sidebar`](../sidebar) | The nav column                                       |
 | [`Dialog`](../dialog)   | The body; header, ✕ and footer stay put              |
 
-Each turns its own `overflow` off and becomes a flex column, so `max-height`
-still bounds the ScrollArea inside it.
+Each drops its own `overflow` and puts its class straight on the ScrollArea
+root — that root is already the column those classes used to create, so a
+`max-height` on it still bounds what scrolls.
 
 The escape hatch isn't a prop either: under **`forced-colors`** (Windows high
 contrast) the painted bar hides itself and the native one comes back. Forced
@@ -104,19 +139,30 @@ site.
 ## Anatomy
 
 ```
-root (relative, overflow hidden)   ← your height goes here
-├── viewport (overflow-y auto, native bar hidden)
-│   └── slot          padding-right clears the bar while it's there
-└── bar (absolute, in the gutter the viewport reserves for it)
-    ├── arrow ▲   press and hold to repeat
-    ├── track     click above/below the thumb to page
-    │   └── thumb drag to scroll
-    └── arrow ▼
+root (grid: 1fr auto / 1fr auto)   ← your height goes here
+├── viewport (1/1, overflow per orientation, native bar hidden)
+│   └── slot
+├── ScrollBar vertical (1/2)       ┐ a track of the grid each — the space one
+│   ├── arrow ▲  press and hold to repeat
+│   ├── track    click past the thumb to page
+│   │   └── thumb  drag to scroll
+│   └── arrow ▼                    │ takes *is* its gutter, and the corner cell
+└── ScrollBar horizontal (2/1)     ┘ stays empty on its own
 ```
 
-The bar is drawn from four measured numbers — `scrollTop`, viewport height,
-content height, track height. A `ResizeObserver` watches the viewport *and* its
-first child, so content that grows re-sizes the thumb.
+A bar that has nothing to scroll collapses to zero across the bar (`width: 0` /
+`height: 0`) rather than leaving: the grid gives the space straight back, and
+the track stays measurable, which is what the numbers below are read from. An
+`autoHide` bar leaves the grid entirely (`position: absolute`) and floats.
+
+The gutter is a track and not `padding` on the viewport, because padding sits at
+the *end* of the content: it keeps the last row clear of a bottom bar but lets
+every row before it scroll underneath. A track shortens the viewport itself.
+
+Each bar is drawn from four measured numbers along its own axis — scroll offset,
+viewport length, content length, track length. A `ResizeObserver` watches the
+viewport, its first child (which is what reports the content's size) and the
+track, so content that grows re-sizes the thumb.
 
 ## Tokens
 
@@ -126,7 +172,7 @@ first child, so content that grows re-sizes the thumb.
 | thumb | `foreground` at 45% / 60% hover / 75% dragging   |
 
 Parked, the bar itself paints nothing — no track fill, no wash. It sits in a
-gutter the viewport reserves for it, so whatever surface it's on shows through
+track of its own beside the content, so whatever surface it's on shows through
 and it reads correctly in the sidebar, a popover and a dialog alike. Only
 `autoHide` adds the wash, because only then does it cover content.
 

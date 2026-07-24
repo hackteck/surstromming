@@ -15,7 +15,9 @@ graph LR
   design["@surstromming/design"]
   icon["@surstromming/icon"]
   pagination["@surstromming/pagination"]
+  scroll_area["@surstromming/scroll-area"]
   table["@surstromming/table"]
+  util["@surstromming/util"]
   data_table --> checkbox
   checkbox --> design
   checkbox --> icon
@@ -28,6 +30,9 @@ graph LR
   pagination --> icon
   data_table --> table
   table --> design
+  table --> scroll_area
+  scroll_area --> design
+  scroll_area --> util
 ```
 
 ## Usage

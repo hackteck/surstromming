@@ -422,7 +422,8 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   `isOpen` class the trigger slot exposes.
 - `Table` is presentational and data-driven: `columns` (`{ key, header, align? }`)
   + `rows` (records), `#cell-<key>` scoped slots as the escape hatch, attrs on
-  the `<table>` (`inheritAttrs: false`) while the `overflow-x: auto` wrapper
+  the `<table>` (`inheritAttrs: false`) while the wrapper — a `ScrollArea` on
+  `orientation="horizontal"`, the package's one dependency besides design —
   stays private. `#head-<key>` slots mirror the cell slots (string `header`
   stays the default), and paint-only `selectedKeys` tints rows by
   `row[rowKey]` — both exist for `DataTable`; Table itself holds no state and
@@ -443,10 +444,10 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   its own: a step arrow at each end (press-and-hold repeats), a rounded thumb,
   and a track that pages. It behaves like a **browser** bar, not a phone's
   overlay — **present whenever there's overflow and then it stays**. Because
-  it's permanent, the viewport reserves a **gutter** for it (`padding-right`
-  while `scrollable`) instead of covering the last 18px of every row, and the
-  bar paints no background of its own — so it reads correctly on any surface
-  (sidebar, popover, dialog). No overflow → no bar and no gutter. The old
+  it's permanent, it takes a **track of its own** instead of covering the last
+  18px of every row, and the bar paints no background of its own — so it reads
+  correctly on any surface (sidebar, popover, dialog). No overflow → no bar and
+  no gutter. The old
   fading behaviour lives on as **`autoHide`** (default `false`, replacing the
   inverted `alwaysVisible`): the bar floats over the content, fades out when
   idle and returns on hover/drag/scroll. It's the one mode that drops the gutter
@@ -454,31 +455,61 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   the one that gets a `background` wash, since only then does it cover content. Only the paint is ours — the viewport is a real scroll
   container, so wheel/keyboard/`scrollIntoView` are untouched; the bar is
   `aria-hidden` with `tabindex="-1"` arrows rather than exposing the same
-  scrolling twice. Drawn from four measured numbers (`scrollTop`, viewport,
-  content, track height) kept fresh by a `ResizeObserver` on the viewport **and
-  its first child**. The carets are an **inline `<svg>` triangle, not `Icon`** —
+  scrolling twice. Drawn from four measured numbers (scroll offset, viewport,
+  content, track **length** — the composable is axis-generic) kept fresh by a
+  `ResizeObserver` on the viewport, **its first child** and the track. The
+  carets are an **inline `<svg>` triangle, not `Icon`** —
   a stroked lucide chevron reads as a link affordance at this size and there's no
   solid caret in the set, so the package doesn't depend on `@surstromming/icon`;
   corners round by stroking the path in its own colour with
   `stroke-linejoin: round`, and that colour must be **opaque** (fill and stroke
-  overlap, so alpha compounds into a dark rim). Vertical only. The component
-  brings no height: the consumer's `class` (root fallthrough) sets it. Its root
-  is a **flex column** (`viewport { flex: 1; min-height: 0 }`), which is what
+  overlap, so alpha compounds into a dark rim). The component
+  brings no height: the consumer's `class` (root fallthrough) sets it — and must
+  leave `display` alone, since the root's **grid** is what places the bars
+  (`1fr auto / 1fr auto`; `viewport { min-width: 0; min-height: 0 }` is what
   makes it work from a `max-height` as well as a fixed height — `height: 100%`
-  can't resolve against an auto-height parent.
+  can't resolve against an auto-height parent).
+- **`orientation` (`both | vertical | horizontal`, default `both`)** picks the
+  axes, and the one bar became a private **`ScrollBar.vue`** the area renders
+  once per painted axis (`axis` prop; it owns its metrics and its
+  drag/step/page). **Both axes by default** because presence is already the
+  rule — a bar exists only while its own axis overflows, so `both` costs
+  nothing where nothing overflows, and the prop's job is to **forbid** an axis
+  (clip it), not to ask for a bar. No consumer in the repo passes it any more —
+  Table and the home page's code card are auto-height, so their vertical bar has
+  nothing to appear for — and the demo keeps one `vertical` example to show what
+  naming an axis is *for* (the same wide row, cut off instead of scrolled). The
+  viewport's
+  `overflow` is a `.orientation-*` class stating **both** axes — leaving one
+  `visible` makes the browser promote it to `auto`, and an axis that scrolls
+  without a bar of ours scrolls behind the hidden native one. Each bar sits in a
+  **grid track** (`1/2` and `2/1`), which is what leaves the corner empty and
+  what replaced the `padding-right` gutter: padding sits at the *end* of the
+  content, so it keeps the last row clear of a bottom bar but lets every row
+  before it scroll underneath — a track shortens the viewport itself. A bar with
+  nothing to scroll **collapses across** (`width: 0` / `height: 0`) rather than
+  unmounting: the grid gives the space straight back while the track stays
+  measurable, which is what removed the old `watch(scrollable) → nextTick →
+  observe()` dance. An `autoHide` bar leaves the grid (`position: absolute`) and
+  floats. `overscroll-behavior` is per-axis and gated on that axis really
+  scrolling (the bars emit `scrollable` up for it) — `contain` on a dead axis
+  still swallows the wheel instead of letting an ancestor use it.
 - **The app scrolls through `ScrollArea`, not the browser.** Every page root is
   `<ScrollArea as="main">` (the `as` prop mirrors Button's) with the old `.page`
   styles on an inner `div`, so padding and `max-width` stay *inside* the
   scroller. `Popover`, `Sidebar` and `Dialog` scroll through it too — **always,
   not behind a prop**: a boolean every consumer would set to `true` is noise,
   and all three are vertical-only scrollers, so there's nothing the native bar
-  would still be needed for (it *would* be for a horizontal one — Table's
-  wrapper keeps the native bar). Started as an opt-in `scrollArea` prop on the
+  would still be needed for. Since `orientation` exists, the sideways ones went
+  the same way — **`Table`'s wrapper *is* a `ScrollArea` on `horizontal`** (its
+  `overflow-x: auto` div is gone, so `DataTable` inherits it), as is the home
+  page's code card. Nothing in the app scrolls behind a native bar any more.
+  Started as an opt-in `scrollArea` prop on the
   three plus four forwarders; that was seven props saying the same thing and was
   dropped. Only the consumer's **content** is wrapped, never their chrome (a
   dialog's header, ✕ and footer stay put). There's **no wrapper element**: each
   host puts its own class straight on the `ScrollArea` (Popover's `.panel`,
-  Dialog's `.body`, Sidebar's `.content`), because the root is already the flex
+  Dialog's `.body`, Sidebar's `.content`), because the root is already the
   column those classes used to create — so they shrank to what's actually
   theirs (surface, max-height, width). Two consequences: Popover's `panel` ref
   is a **component** ref, so the element for the outside-click test comes off
@@ -596,8 +627,9 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   deployments. `vercel build` runs the install itself (no `npm ci` step);
   needs the `VERCEL_TOKEN` secret.
 - **Publishing:** every package under `packages/` is published to npm under the
-  `@surstromming` scope at **one shared version**; the repo root stays
-  `private`. Licence is **MIT** — a `LICENSE` file sits at the root *and* in
+  `@surstromming` scope, each **versioned independently** — they're independent
+  packages, so a change in one is no reason to reprint the other 40; the repo
+  root stays `private`. Licence is **MIT** — a `LICENSE` file sits at the root *and* in
   each package, because npm's tarball only carries what's in the package
   directory and MIT requires the text to travel with the copy. Each manifest
   carries `license`, `author`, `repository` (with `directory`), `homepage`,
@@ -611,13 +643,29 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
 - Internal deps are **`^<version>`, never `*`** — `*` resolves to whatever is
   latest on the registry at install time. **Version bumps are done on request,
   never automated** (a `set-version` script existed briefly and was removed —
-  the user asks when a bump is wanted). A bump has to move **both** halves:
-  every package's `version` *and* every internal `^<version>` range.
-  `npm version --workspaces` only does the first, so on its own it leaves a
-  fresh `button@0.2.0` asking npm for `design@^0.1.0`.
+  the user asks when a bump is wanted). Only the **affected** packages move —
+  the ones whose own source changed — and a small change is a **patch**
+  (`0.1.0 → 0.1.1`), not a minor. **A bump writes the package's
+  `CHANGELOG.md`** — one per package, like the version it documents, newest
+  version first, and **anything that might break a consumer gets its own
+  section** saying what and what to do instead. npm does *not* auto-include it
+  (only `package.json`, README and LICENSE ride along), so `files` has to list
+  it: `["src", "CHANGELOG.md"]`. A dependent moves only if it *needs* the new
+  version: `^0.1.0` already accepts `0.1.1`, so the range is left alone unless
+  the code now uses something the old version doesn't have (Table asks for
+  `scroll-area@^0.1.1` because it passes `orientation`; Popover/Sidebar/Dialog
+  stayed on `^0.1.0`). A range that does move has to move **with** the version
+  it points at — `npm version --workspaces` writes versions only, so on its own
+  it leaves a fresh `table@0.1.1` asking npm for a `scroll-area` that predates
+  the prop it uses. Then `npm install`, so the lockfile's `packages/*` entries
+  follow — it pins the old version otherwise.
+  First bump: **scroll-area + table → 0.1.1** (2026-07-24, `orientation`).
   `npm run release` / `release:dry` must run **from the repo root** — invoked
   from inside a package directory, npm silently scopes them to that one
-  package.
+  package. They publish **every** workspace, though, which independent versions
+  outgrew: npm refuses a version that's already on the registry, so a release
+  now names what moved — `npm publish -w @surstromming/scroll-area -w
+  @surstromming/table`.
 
 ## Data-driven components (the Vue way)
 

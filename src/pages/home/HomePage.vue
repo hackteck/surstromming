@@ -55,10 +55,14 @@
             <span :class="$style.dot" />
             <span :class="$style.dot" />
           </div>
+          <!-- The last native scroller in the app; a narrow screen scrolls this
+               sideways under the drawn bar like everything else. -->
+          <ScrollArea>
           <pre :class="$style.codeBody"><span :class="$style.comment"># install only what you use</span>
   npm i <span :class="$style.string">@surstromming/button</span>
 
   <span :class="$style.keyword">import</span> { Button } <span :class="$style.keyword">from</span> <span :class="$style.string">"@surstromming/button"</span></pre>
+          </ScrollArea>
         </div>
       </section>
 
@@ -249,8 +253,8 @@ const sections = componentCategories.map((category) => ({
   background-color: design.color(border);
 }
 
+// Padding inside the scroller, so the code keeps its inset as it moves.
 .codeBody {
-  overflow-x: auto;
   padding: design.spacing(5);
   color: design.color(foreground);
   font-family: design.font(mono);

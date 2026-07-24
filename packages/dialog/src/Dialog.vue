@@ -137,8 +137,8 @@ const $style = useCssModule()
 }
 
 // Only the content scrolls — the header, the ✕ and the footer stay put. The
-// class lands on the ScrollArea's own root, which is already a flex column;
-// all it needs from the panel is permission to shrink.
+// class lands on the ScrollArea's own root, which is already the column that
+// bounds itself; all it needs from the panel is permission to shrink.
 .body {
   min-height: 0; // a flex child only shrinks below its content with this
 }

@@ -89,7 +89,7 @@ const classes = computed(() => [
 // to the trigger stays here as a margin, so tokens stay in CSS.
 .panel {
   // Tall enough for a month grid (DatePicker), still a cap on a long list.
-  // The ScrollArea is already a flex column, so this bounds what it scrolls.
+  // The ScrollArea is already the column, so this bounds what it scrolls.
   max-height: design.spacing(96);
   border: 1px solid design.color(border);
   border-radius: design.radius(md);

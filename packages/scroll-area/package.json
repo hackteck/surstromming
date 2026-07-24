@@ -1,6 +1,6 @@
 {
   "name": "@surstromming/scroll-area",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A scroll container with an Edge-style overlay scrollbar.",
   "license": "MIT",
   "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
@@ -28,7 +28,8 @@
     "**/*.css"
   ],
   "files": [
-    "src"
+    "src",
+    "CHANGELOG.md"
   ],
   "main": "./src/index.ts",
   "module": "./src/index.ts",

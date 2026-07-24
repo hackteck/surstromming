@@ -1,5 +1,5 @@
 <template>
-  <div :class="$style.root">
+  <ScrollArea :class="$style.root">
     <table :class="$style.table" v-bind="$attrs">
       <caption v-if="props.caption" :class="$style.caption">
         {{ props.caption }}
@@ -24,11 +24,12 @@
         </tr>
       </tbody>
     </table>
-  </div>
+  </ScrollArea>
 </template>
 
 <script setup lang="ts">
 import { computed, useCssModule } from 'vue'
+import { ScrollArea } from '@surstromming/scroll-area'
 import type { TableColumn, TableRow } from './index'
 
 // Attrs describe the table itself, not the private scroll wrapper.
@@ -70,9 +71,12 @@ const rowClasses = (row: TableRow) => [$style.row, { [$style.isSelected]: isSele
 <style module lang="scss">
 @use '@surstromming/design' as design;
 
+// The wrapper is the ScrollArea itself — a wide table scrolls sideways under
+// the drawn bar, like everything else here. It brings its own overflow, and
+// nothing needs saying about the axis: the wrapper is auto-height, so the
+// vertical bar has nothing to appear for.
 .root {
   width: 100%;
-  overflow-x: auto;
 }
 
 .table {

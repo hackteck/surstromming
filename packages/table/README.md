@@ -10,7 +10,12 @@ table. Presentational only — sorting, selection and pagination live in
 graph LR
   table["@surstromming/table"]
   design["@surstromming/design"]
+  scroll_area["@surstromming/scroll-area"]
+  util["@surstromming/util"]
   table --> design
+  table --> scroll_area
+  scroll_area --> design
+  scroll_area --> util
 ```
 
 ## Usage
@@ -78,7 +83,7 @@ doesn't belong in a table.
 ## Anatomy
 
 ```
-div.root                    // overflow-x: auto — the table never widens the page
+ScrollArea.root             // the table never widens the page; it scrolls instead
   └─ table.table            // full width, 0.875rem
        ├─ caption           // muted, under the table
        ├─ thead > tr > th   // muted-foreground, 500, bottom border
@@ -89,7 +94,11 @@ div.root                    // overflow-x: auto — the table never widens the p
 
 `inheritAttrs: false`; attrs land on the **`<table>`**, not the scroll wrapper —
 a consumer's `class` or `aria-*` describes the table itself. The wrapper stays
-private.
+private: it's a [`ScrollArea`](../scroll-area), so a table wider than its box
+scrolls under the drawn bar rather than the native one, and it reads like every
+other scroller here. It says nothing about the axis — the wrapper is auto-height,
+so only the sideways bar ever has anything to appear for. Vertically the table is
+never bounded; that's the page's job, or a `ScrollArea` of the consumer's own.
 
 ## Tokens
 
