@@ -132,7 +132,15 @@ export const useAnchoredPosition = (
     // `position: relative` on the same element, and cross-package rule order is
     // not something to bet the placement on. Stacking is a class — see
     // `.layer-*` in Popover.vue.
-    const base = { position: 'fixed' }
+    //
+    // Parked at the origin and moved by `transform`, never by `top`/`left`: an
+    // inset offset is *also* the space a shrink-to-fit box has left to grow
+    // into, so a panel placed 374px along measured 56px wide, which moved it
+    // left, which let it grow, which moved it again — a loop the ResizeObserver
+    // walked one frame at a time, and it read as the menu sliding out from
+    // under its own trigger. From the origin the width is settled before the
+    // position is ever applied.
+    const base = { position: 'fixed', top: '0px', left: '0px' }
 
     if (side === 'bottom') {
       const left = align === 'start' ? rect.left : rect.right - width
@@ -140,8 +148,8 @@ export const useAnchoredPosition = (
       const x = clamp(left, width, window.innerWidth)
       return {
         ...base,
-        top: `${top}px`, // follows the anchor, all the way out
-        left: `${x}px`,
+        // `top` follows the anchor, all the way out.
+        transform: `translate(${x}px, ${top}px)`,
         minWidth: `${rect.width}px`, // never narrower than what it's anchored to
         clipPath: clipPathFor(x, top, width, height, clip),
       }
@@ -151,8 +159,7 @@ export const useAnchoredPosition = (
     const y = clamp(align === 'start' ? rect.top : rect.bottom - height, height, window.innerHeight)
     return {
       ...base,
-      left: `${x}px`,
-      top: `${y}px`,
+      transform: `translate(${x}px, ${y}px)`,
       clipPath: clipPathFor(x, y, width, height, clip),
     }
   })

@@ -140,6 +140,16 @@ div.root            // measured for the trigger's rect (no positioning of its ow
   before paint, so the clamped position is the first one drawn, not a correction
   after it — and kept fresh by a `ResizeObserver` for panels whose content
   changes (a combobox list being filtered).
+- **The panel is moved by `transform`, not by `top`/`left`.** An inset offset is
+  also the room a shrink-to-fit box has left to grow into, so a panel placed
+  374px along a 430px viewport measured 56px wide — which moved it left, which
+  let it grow, which moved it again. The `ResizeObserver` walked that loop one
+  frame at a time and it read as the menu sliding out from under its trigger.
+  Placed from the origin, the width is settled before the position is applied.
+
+  The panel therefore makes a containing block, which only matters to a
+  `position: fixed` descendant of one — there is none in the kit, since every
+  nested overlay teleports to `<body>` itself.
 
   All of that lives in `src/composables/useAnchoredPosition.ts`; the component
   itself is left with dismissal and the template.
