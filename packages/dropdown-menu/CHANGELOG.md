@@ -1,5 +1,22 @@
 # @surstromming/dropdown-menu
 
+## 0.1.5 — 2026-07-26
+
+### Fixed
+
+- Requires `@surstromming/scroll-area@^0.1.2`, so a tap inside a scroller on a
+  touch device is no longer swallowed. See scroll-area's changelog for the
+  detail. No change in this package's own source or API.
+
+## 0.1.4 — 2026-07-26
+
+### Fixed
+
+- Requires `@surstromming/popover@^0.1.3`, so a menu is placed where its
+  trigger is on a pinch-zoomed page instead of somewhere off screen. See
+  popover's changelog for the detail. No change in this package's own source or
+  API.
+
 ## 0.1.3 — 2026-07-26
 
 ### Fixed

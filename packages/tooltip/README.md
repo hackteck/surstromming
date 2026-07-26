@@ -10,7 +10,9 @@ hint on a truncated value. Text only; anything richer is a
 graph LR
   tooltip["@surstromming/tooltip"]
   design["@surstromming/design"]
+  util["@surstromming/util"]
   tooltip --> design
+  tooltip --> util
 ```
 
 ## Usage

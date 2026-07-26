@@ -1,6 +1,6 @@
 {
   "name": "@surstromming/design",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Everything related to design system, including colors, typography, and spacing.",
   "license": "MIT",
   "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
@@ -28,7 +28,8 @@
     "**/*.css"
   ],
   "files": [
-    "src"
+    "src",
+    "CHANGELOG.md"
   ],
   "exports": {
     ".": "./src/index.scss",

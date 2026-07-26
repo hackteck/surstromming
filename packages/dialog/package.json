@@ -1,6 +1,6 @@
 {
   "name": "@surstromming/dialog",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Modal dialog, with an alert-dialog mode.",
   "license": "MIT",
   "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
@@ -28,7 +28,8 @@
     "**/*.css"
   ],
   "files": [
-    "src"
+    "src",
+    "CHANGELOG.md"
   ],
   "main": "./src/index.ts",
   "module": "./src/index.ts",
@@ -39,7 +40,7 @@
   "dependencies": {
     "@surstromming/backdrop": "^0.1.0",
     "@surstromming/design": "^0.1.0",
-    "@surstromming/scroll-area": "^0.1.0",
+    "@surstromming/scroll-area": "^0.1.2",
     "@surstromming/icon": "^0.1.0"
   },
   "peerDependencies": {

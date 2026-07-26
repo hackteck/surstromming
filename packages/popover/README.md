@@ -25,6 +25,7 @@ graph LR
   util["@surstromming/util"]
   popover --> design
   popover --> scroll_area
+  popover --> util
   scroll_area --> design
   scroll_area --> util
 ```

@@ -1,44 +1,19 @@
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
-import { useResizeObserver } from '@surstromming/util'
+import { useAnchored, clamp, rectOf, type Rect, type Size } from '@surstromming/util'
+import type { Ref } from 'vue'
 import type { PopoverAlign, PopoverSide } from '../index'
-
-/** Kept clear of the viewport edges when a panel has to be shifted inwards. */
-const VIEWPORT_MARGIN = 8
-
-/**
- * The **layout** viewport — the one `position: fixed` resolves against, and the
- * one every `getBoundingClientRect()` below is measured in. `innerWidth` /
- * `innerHeight` are the *visual* viewport, which Safari shrinks while the page
- * is pinch-zoomed (a trackpad pinch on a Mac counts, and on iOS it is the
- * normal state of an over-zoomed page). Mix the two and the numbers stop
- * describing the same space; both ways that goes wrong are bad. A panel clamped
- * against a 1019px visual width while its anchor sits at 1474 in the layout one
- * lands 464px to the left of its own trigger — and a clip built from the short
- * visual height cuts the panel away completely, which reads as a menu that flat
- * refuses to open.
- */
-const viewport = () => ({
-  width: document.documentElement.clientWidth,
-  height: document.documentElement.clientHeight,
-})
-
-export interface AnchoredPlacement {
-  side: PopoverSide
-  align: PopoverAlign
-}
 
 /**
  * Places a teleported panel against an anchor it no longer descends from.
  *
- * Everything here exists because the panel lives on `<body>`: CSS can't reach
- * the anchor, so the coordinates are measured and re-measured — on any ancestor
- * scrolling, on resize, and whenever the panel's own size changes.
+ * The measuring, the coordinate space and the tracking are `useAnchored`'s
+ * (util) — shared with Tooltip, which has the same mechanics and the opposite
+ * policy. What lives here is the policy.
  *
- * It **shifts, it never flips**. The panel is clamped into the viewport along
- * the axis its alignment runs on, so `align: end` on an anchor near the left
- * edge can't push it off screen. The other axis is left alone on purpose: that
- * one tracks the anchor, and clamping it would pin the panel to the top of the
- * screen while the thing it belongs to scrolls away underneath.
+ * It **shifts, it never flips**. The panel is clamped into the visible viewport
+ * along the axis its alignment runs on, so `align: end` on an anchor near the
+ * left edge can't push it off screen. The other axis is left alone on purpose:
+ * that one tracks the anchor, and clamping it would pin the panel to the top of
+ * the screen while the thing it belongs to scrolls away underneath.
  *
  * As the anchor scrolls away the panel goes with it and is **clipped** at the
  * edges of the area the anchor is visible in — the viewport narrowed by its
@@ -48,18 +23,18 @@ export interface AnchoredPlacement {
  * sideways. The viewport alone isn't enough for that boundary: an anchor
  * sliding *behind* a sticky header is still inside it.
  */
+
+export interface AnchoredPlacement {
+  side: PopoverSide
+  align: PopoverAlign
+}
+
 export const useAnchoredPosition = (
   anchor: Readonly<Ref<HTMLElement | null>>,
   panelElement: () => HTMLElement | undefined,
   placement: () => AnchoredPlacement,
   open: Ref<boolean>,
 ) => {
-  const anchorRect = ref<DOMRect | null>(null)
-  // The area the anchor is actually allowed to be seen in — the viewport
-  // narrowed by every scrolling ancestor. The app shell's `main` starts below
-  // the sticky header, which is what keeps a panel off it.
-  const clipRect = ref({ top: 0, right: 0, bottom: 0, left: 0 })
-
   // The chain can't change while the panel is open, so it's collected once and
   // only the rects are re-read per scroll — `getComputedStyle` is too heavy to
   // call on every frame of one.
@@ -82,17 +57,10 @@ export const useAnchoredPosition = (
   // can slide out of view along, and so the only one worth cutting the panel at
   // — clipping the other one is what stops a menu escaping the sidebar it was
   // opened in, which is the whole reason the panel is teleported.
-  // `align: end` and `side: left` are expressed as a right/bottom edge, which
-  // only becomes a left/top once the panel's own size is known.
-  const panelSize = ref({ width: 0, height: 0 })
-
-  const measure = () => {
-    anchorRect.value = anchor.value?.getBoundingClientRect() ?? null
-
-    const { width, height } = viewport()
-    let clip = { top: 0, right: width, bottom: height, left: 0 }
+  const clipArea = (bounds: Rect) => {
+    const clip = { top: bounds.top, right: bounds.right, bottom: bounds.bottom, left: bounds.left }
     for (const element of clippers) {
-      const rect = element.getBoundingClientRect()
+      const rect = rectOf(element)
       if (element.scrollHeight > element.clientHeight) {
         clip.top = Math.max(clip.top, rect.top)
         clip.bottom = Math.min(clip.bottom, rect.bottom)
@@ -102,49 +70,26 @@ export const useAnchoredPosition = (
         clip.right = Math.min(clip.right, rect.right)
       }
     }
-    clipRect.value = clip
-  }
-
-  const measurePanel = () => {
-    const element = panelElement()
-    if (element) panelSize.value = { width: element.offsetWidth, height: element.offsetHeight }
-  }
-
-  const { observe } = useResizeObserver(() => [panelElement()], measurePanel)
-
-  const clamp = (start: number, size: number, limit: number) => {
-    const last = Math.max(VIEWPORT_MARGIN, limit - size - VIEWPORT_MARGIN)
-    return Math.min(Math.max(start, VIEWPORT_MARGIN), last)
+    return clip
   }
 
   // Cuts the panel off at the edges of the area its anchor lives in, so it
   // slides *under* the app's chrome instead of over it — the same thing a panel
-  // that wasn't teleported would do inside that scroll container. `undefined`
-  // while nothing needs cutting: `clip-path` makes a containing block, and
-  // there's no reason to pay for one on every open popover.
-  const clipPathFor = (
-    x: number,
-    y: number,
-    panelWidth: number,
-    panelHeight: number,
-    clip: { top: number; right: number; bottom: number; left: number },
-  ) => {
+  // that wasn't teleported would do inside that scroll container. Empty while
+  // nothing needs cutting: `clip-path` makes a containing block, and there's no
+  // reason to pay for one on every open popover.
+  const clipPathFor = (x: number, y: number, panel: Size, bounds: Rect) => {
+    const clip = clipArea(bounds)
     const top = Math.max(0, clip.top - y)
-    const right = Math.max(0, x + panelWidth - clip.right)
-    const bottom = Math.max(0, y + panelHeight - clip.bottom)
+    const right = Math.max(0, x + panel.width - clip.right)
+    const bottom = Math.max(0, y + panel.height - clip.bottom)
     const left = Math.max(0, clip.left - x)
     if (!top && !right && !bottom && !left) return ''
     return `inset(${top}px ${right}px ${bottom}px ${left}px)`
   }
 
-  const style = computed(() => {
-    const rect = anchorRect.value
-    if (!rect) return {}
-
+  const place = (rect: Rect, panel: Size, bounds: Rect) => {
     const { side, align } = placement()
-    const { width, height } = panelSize.value
-
-    const clip = clipRect.value
 
     // `position` is inline because as a class it would race ScrollArea's own
     // `position: relative` on the same element, and cross-package rule order is
@@ -161,72 +106,28 @@ export const useAnchoredPosition = (
     const base = { position: 'fixed', top: '0px', left: '0px' }
 
     if (side === 'bottom') {
-      const left = align === 'start' ? rect.left : rect.right - width
-      const top = rect.bottom
-      const x = clamp(left, width, viewport().width)
+      const start = align === 'start' ? rect.left : rect.right - panel.width
+      const x = clamp(start, panel.width, bounds.left, bounds.right)
+      const y = rect.bottom
       return {
         ...base,
         // `top` follows the anchor, all the way out.
-        transform: `translate(${x}px, ${top}px)`,
+        transform: `translate(${x}px, ${y}px)`,
         minWidth: `${rect.width}px`, // never narrower than what it's anchored to
-        clipPath: clipPathFor(x, top, width, height, clip),
+        clipPath: clipPathFor(x, y, panel, bounds),
       }
     }
 
-    const x = side === 'right' ? rect.right : rect.left - width
-    const y = clamp(align === 'start' ? rect.top : rect.bottom - height, height, viewport().height)
+    const x = side === 'right' ? rect.right : rect.left - panel.width
+    const start = align === 'start' ? rect.top : rect.bottom - panel.height
+    const y = clamp(start, panel.height, bounds.top, bounds.bottom)
     return {
       ...base,
       transform: `translate(${x}px, ${y}px)`,
-      clipPath: clipPathFor(x, y, width, height, clip),
+      minWidth: '',
+      clipPath: clipPathFor(x, y, panel, bounds),
     }
-  })
-
-  // Vue would apply the new position on its next render tick — a frame late,
-  // which reads as the panel lagging behind and snapping back. Writing the same
-  // values straight to the element inside the scroll handler removes that tick;
-  // the re-render then sets what's already there.
-  const track = () => {
-    measure()
-    const element = panelElement()
-    if (element) Object.assign(element.style, style.value)
   }
 
-  const stopTracking = () => {
-    window.removeEventListener('scroll', track, true)
-    window.removeEventListener('resize', track)
-  }
-
-  const startTracking = () => {
-    collectClippers()
-    measure()
-    // The panel only exists while open, so it can only be measured — and
-    // observed — once it's in the DOM. `nextTick` lands before paint, so the
-    // clamped position is the first one drawn, not a correction after it.
-    nextTick(() => {
-      measurePanel()
-      observe()
-    })
-
-    // Capture: a scroll in *any* ancestor moves the anchor, scroll events don't
-    // bubble, and a fixed panel doesn't follow on its own.
-    window.addEventListener('scroll', track, true)
-    window.addEventListener('resize', track)
-  }
-
-  watch(open, (isOpen) => {
-    if (isOpen) startTracking()
-    else stopTracking()
-  })
-
-  // A popover can be handed `open: true` from the start. The watcher above
-  // can't catch that (there's no change to react to), and an unmeasured panel
-  // has no position at all — it lands in the body's flow, unstacked.
-  onMounted(() => {
-    if (open.value) startTracking()
-  })
-
-  onBeforeUnmount(stopTracking)
-
-  return { style, measure }
+  return useAnchored(anchor, panelElement, open, place, { onOpen: collectClippers })
 }

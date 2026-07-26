@@ -1,6 +1,6 @@
 {
   "name": "@surstromming/table",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Data-driven semantic table.",
   "license": "MIT",
   "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@surstromming/design": "^0.1.0",
-    "@surstromming/scroll-area": "^0.1.1"
+    "@surstromming/scroll-area": "^0.1.2"
   },
   "peerDependencies": {
     "vue": "^3.4.0"

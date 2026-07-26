@@ -1,6 +1,6 @@
 {
   "name": "@surstromming/dropdown-menu",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "description": "A menu of actions anchored to a trigger.",
   "license": "MIT",
   "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
@@ -40,7 +40,7 @@
   "dependencies": {
     "@surstromming/design": "^0.1.0",
     "@surstromming/icon": "^0.1.0",
-    "@surstromming/popover": "^0.1.2"
+    "@surstromming/popover": "^0.1.4"
   },
   "peerDependencies": {
     "vue": "^3.4.0"

@@ -1,5 +1,47 @@
 # @surstromming/popover
 
+## 0.1.4 — 2026-07-26
+
+### Fixed
+
+- Requires `@surstromming/scroll-area@^0.1.2`. Every panel in this library
+  lives in one, and a tap on a trigger inside a scroller was being swallowed
+  whole — see scroll-area's changelog. No change in this package's own source
+  or API.
+
+## 0.1.3 — 2026-07-26
+
+### Fixed
+
+- **A panel is placed correctly on a pinch-zoomed page.** Zoom splits the
+  viewport in two — the *layout* viewport the page was laid out at, and the
+  smaller *visual* one the reader looks through and pans around. WebKit reports
+  `getBoundingClientRect()` against the visual viewport while a
+  `position: fixed` element is still placed against the layout one, so a panel
+  drawn at the number its trigger measured landed `visualViewport.offsetLeft`
+  away from it: hundreds of pixels to the left, or off screen altogether once
+  someone had panned right to reach a trailing control. That is the same
+  correction `@floating-ui/dom` makes, and 0.1.2's move to
+  `document.documentElement` fixed the *bound* while leaving the coordinates
+  unconverted — which is why it changed nothing.
+
+- **A panel stays on its trigger while the page is zoomed and panned.** The
+  clamp that keeps a panel on screen is measured against the **layout** viewport
+  — the page's own box — and not against the part of the screen currently
+  visible. Zoomed in those differ, and clamping to the visible part re-answers
+  the question on every pan: the panel slid out from under its trigger and
+  crawled along the screen edge, 168px off it in the reported case. Keeping a
+  panel inside the page is a layout question whose answer holds still, and it is
+  the same reason the axis that tracks the anchor was already left unclamped.
+
+  `visualViewport` is still tracked (`resize` and `scroll`, which a pinch fires
+  when `window` fires neither), because on WebKit both halves of the coordinate
+  conversion move together and a rect read mid-gesture has to re-converge.
+
+  No API change. Placement mechanics moved to `@surstromming/util`'s
+  `useAnchored` (`^0.1.1`), shared with Tooltip; this package keeps the policy
+  — shift, never flip, and clip under the app's chrome.
+
 ## 0.1.2 — 2026-07-26
 
 ### Fixed

@@ -2,7 +2,7 @@
   <component
     :is="as"
     :class="$style.root"
-    @pointerenter="hovering = true"
+    @pointerenter="onPointerEnter"
     @pointerleave="hovering = false"
   >
     <div ref="viewport" :class="viewportClasses" @scroll="onScroll">
@@ -72,6 +72,26 @@ const scrollsHorizontally = ref(false)
 const hovering = ref(false)
 const scrolling = ref(false)
 const active = computed(() => hovering.value || scrolling.value)
+
+/**
+ * **A touch is not a hover**, and taking it for one cost a whole app its taps.
+ *
+ * iOS fires `pointerenter` for a finger, on every tap. With `autoHide` that
+ * flipped an idle bar to visible *during* the gesture — `.isHidden` drops
+ * `pointer-events: none`, so a full-height strip appears over the content
+ * between the finger going down and coming up. WebKit re-hit-tests at
+ * `touchend` to synthesize the click, finds the layer under the finger has
+ * changed, and quietly declines: no `mousedown`, no `mouseup`, no `click`.
+ * Every button inside the scroller stopped working, on a phone only, and
+ * intermittently — a bar already up because you'd just scrolled left nothing to
+ * change, and the tap went through.
+ *
+ * Mouse and pen only, then. A touch scroller still shows its bar while it
+ * scrolls, which is the whole of what an overlay bar is for.
+ */
+const onPointerEnter = (event: PointerEvent) => {
+  if (event.pointerType !== 'touch') hovering.value = true
+}
 
 let idleTimer: number | undefined
 // Measuring is each bar's own business; this is only about waking an idle one.

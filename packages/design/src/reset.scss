@@ -46,6 +46,24 @@ button {
   background: none;
 }
 
+// A tap on a zoomable page can still be the first half of a double-tap-to-zoom,
+// so Safari holds the `click` back ~300ms to find out — long enough that a menu
+// opening feels broken. `manipulation` drops double-tap zoom **on these
+// elements only**: pinch still zooms, double-tapping the page still zooms, and
+// a control reacts to the finger immediately. Not on `body`, which would take
+// the gesture away from the text.
+a,
+button,
+label,
+select,
+summary,
+[role='button'],
+[role='menuitem'],
+[role='option'],
+[role='tab'] {
+  touch-action: manipulation;
+}
+
 a {
   color: inherit;
   text-decoration: inherit;

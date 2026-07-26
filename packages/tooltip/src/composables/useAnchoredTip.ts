@@ -1,22 +1,9 @@
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
+import { computed, type Ref } from 'vue'
+import { useAnchored, clamp, type Rect, type Size } from '@surstromming/util'
 import type { TooltipSide } from '../index'
 
 /** Distance between the trigger and the tip. */
 const GAP = 6
-/** Kept clear of the viewport edges when the tip has to be shifted inwards. */
-const MARGIN = 8
-
-/**
- * The **layout** viewport — what `position: fixed` resolves against, and what
- * every `getBoundingClientRect()` below is measured in. `innerWidth` /
- * `innerHeight` are the *visual* viewport, which Safari shrinks while the page
- * is pinch-zoomed; mixed with the rects they describe a different space, and the
- * tip flips or clamps against an edge that isn't where it thinks it is.
- */
-const viewport = () => ({
-  width: document.documentElement.clientWidth,
-  height: document.documentElement.clientHeight,
-})
 
 const OPPOSITE: Record<TooltipSide, TooltipSide> = {
   top: 'bottom',
@@ -33,10 +20,13 @@ const OPPOSITE: Record<TooltipSide, TooltipSide> = {
  * ancestor cuts it — and every page in this library scrolls through a
  * `ScrollArea`, so a trigger near the top of one had its whole tip cut away.
  *
- * Unlike a popover this **flips**. A popover is a surface you work in, so it
- * shifts and stays on the side it was asked for; a tip is a label, and a label
- * that would land off-screen belongs on the other side of the thing it labels.
- * The cross axis is then clamped into the viewport.
+ * The measuring, the coordinate space and the tracking are `useAnchored`'s
+ * (util), shared with Popover. The policy here is the opposite of that one:
+ * this **flips**. A popover is a surface you work in, so it shifts and stays on
+ * the side it was asked for; a tip is a label, and a label that would land off
+ * screen belongs on the other side of the thing it labels. The cross axis is
+ * then clamped into the viewport. It is also **not** clipped the way a panel is
+ * — on the ladder's top rung a tip is supposed to paint over the header.
  */
 export const useAnchoredTip = (
   anchor: Readonly<Ref<HTMLElement | null>>,
@@ -44,99 +34,60 @@ export const useAnchoredTip = (
   preferred: () => TooltipSide,
   open: Ref<boolean>,
 ) => {
-  const anchorRect = ref<DOMRect | null>(null)
-  const tipSize = ref({ width: 0, height: 0 })
-
-  const measure = () => {
-    anchorRect.value = anchor.value?.getBoundingClientRect() ?? null
-  }
-
-  const measureTip = () => {
-    const element = tipElement()
-    if (element) tipSize.value = { width: element.offsetWidth, height: element.offsetHeight }
-  }
-
-  const clamp = (start: number, size: number, limit: number) => {
-    const last = Math.max(MARGIN, limit - size - MARGIN)
-    return Math.min(Math.max(start, MARGIN), last)
-  }
-
   // The asked-for side wins whenever it fits. When it doesn't, the opposite one
   // is only better if *it* fits — otherwise flipping would just move the
   // problem, so the tip stays where the consumer put it.
-  const side = computed<TooltipSide>(() => {
-    const rect = anchorRect.value
+  const sideFor = (rect: Rect, tip: Size, bounds: Rect): TooltipSide => {
     const want = preferred()
-    if (!rect) return want
-
-    const { width, height } = tipSize.value
-    const bounds = viewport()
+    const margin = GAP
     const fits: Record<TooltipSide, boolean> = {
-      top: rect.top - height - GAP >= MARGIN,
-      bottom: rect.bottom + height + GAP <= bounds.height - MARGIN,
-      left: rect.left - width - GAP >= MARGIN,
-      right: rect.right + width + GAP <= bounds.width - MARGIN,
+      top: rect.top - tip.height - margin >= bounds.top,
+      bottom: rect.bottom + tip.height + margin <= bounds.bottom,
+      left: rect.left - tip.width - margin >= bounds.left,
+      right: rect.right + tip.width + margin <= bounds.right,
     }
     return fits[want] || !fits[OPPOSITE[want]] ? want : OPPOSITE[want]
-  })
+  }
 
-  const style = computed(() => {
-    const rect = anchorRect.value
-    const { width, height } = tipSize.value
+  const place = (rect: Rect, tip: Size, bounds: Rect) => {
     // Rendered but not yet measured: park it out of sight rather than let a
     // frame of it land at the top-left corner.
-    if (!rect || !width) return { position: 'fixed' as const, top: '0', left: '0', visibility: 'hidden' as const }
-
-    if (side.value === 'top' || side.value === 'bottom') {
-      const top = side.value === 'top' ? rect.top - height - GAP : rect.bottom + GAP
-      const left = clamp(rect.left + rect.width / 2 - width / 2, width, viewport().width)
-      return { position: 'fixed' as const, top: `${top}px`, left: `${left}px` }
+    if (!tip.width) {
+      return { position: 'fixed', top: '0px', left: '0px', visibility: 'hidden' }
     }
 
-    const left = side.value === 'left' ? rect.left - width - GAP : rect.right + GAP
-    const top = clamp(rect.top + rect.height / 2 - height / 2, height, viewport().height)
-    return { position: 'fixed' as const, top: `${top}px`, left: `${left}px` }
-  })
+    const to = sideFor(rect, tip, bounds)
 
-  // Any ancestor scrolling moves the trigger, and scroll events don't bubble —
-  // hence capture. Writing straight to the element skips the render tick that
-  // would otherwise show as the tip lagging a frame behind.
-  const track = () => {
-    measure()
-    const element = tipElement()
-    if (element) Object.assign(element.style, style.value)
+    if (to === 'top' || to === 'bottom') {
+      const top = to === 'top' ? rect.top - tip.height - GAP : rect.bottom + GAP
+      const left = clamp(
+        rect.left + rect.width / 2 - tip.width / 2,
+        tip.width,
+        bounds.left,
+        bounds.right,
+      )
+      return { position: 'fixed', top: `${top}px`, left: `${left}px`, visibility: 'visible' }
+    }
+
+    const left = to === 'left' ? rect.left - tip.width - GAP : rect.right + GAP
+    const top = clamp(
+      rect.top + rect.height / 2 - tip.height / 2,
+      tip.height,
+      bounds.top,
+      bounds.bottom,
+    )
+    return { position: 'fixed', top: `${top}px`, left: `${left}px`, visibility: 'visible' }
   }
 
-  const stopTracking = () => {
-    window.removeEventListener('scroll', track, true)
-    window.removeEventListener('resize', track)
-  }
+  const { style, anchorRect, size, bounds } = useAnchored(anchor, tipElement, open, place)
 
-  const startTracking = () => {
-    measure()
-    // The tip only exists while open, so it can only be measured once it's in
-    // the DOM. `nextTick` lands before paint, so the placed position is the
-    // first one drawn rather than a correction after it.
-    nextTick(measureTip)
-
-    // Capture: a scroll in *any* ancestor moves the trigger, scroll events
-    // don't bubble, and a fixed tip doesn't follow on its own.
-    window.addEventListener('scroll', track, true)
-    window.addEventListener('resize', track)
-  }
-
-  watch(open, (isOpen) => {
-    if (isOpen) startTracking()
-    else stopTracking()
-  })
-
-  // `v-model:open` can hand it `true` from the start; the watcher has no change
-  // to react to, and an unmeasured tip has no position at all.
-  onMounted(() => {
-    if (open.value) startTracking()
-  })
-
-  onBeforeUnmount(stopTracking)
+  // Which side it actually ended up on, for the caller's arrow — the same
+  // question `place` answers, asked separately so neither writes to the other.
+  const side = computed(() =>
+    anchorRect.value && size.value.width
+      ? sideFor(anchorRect.value, size.value, bounds.value)
+      : preferred(),
+  )
 
   return { style, side }
 }

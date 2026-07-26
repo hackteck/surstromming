@@ -19,3 +19,13 @@ query?.addEventListener('change', (event) => {
 export const isMobile = readonly(matches)
 
 export { useResizeObserver } from './composables/useResizeObserver'
+export {
+  clamp,
+  rectOf,
+  useAnchored,
+  layoutViewport,
+  VIEWPORT_MARGIN,
+  type AnchoredOptions,
+  type Rect,
+  type Size,
+} from './composables/useAnchored'

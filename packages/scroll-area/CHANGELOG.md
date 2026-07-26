@@ -1,5 +1,31 @@
 # @surstromming/scroll-area
 
+## 0.1.2 — 2026-07-26
+
+### Fixed
+
+- **A tap inside an `autoHide` scroller no longer goes nowhere.** `hovering`
+  was set from `pointerenter` regardless of what kind of pointer it was, and
+  iOS fires that for a finger, on every tap. With `autoHide` the flag flips an
+  idle bar to visible — `.isHidden` drops its `pointer-events: none` — so a
+  full-height strip appeared over the content *between* the finger going down
+  and coming up. WebKit re-hit-tests at `touchend` to synthesize the click,
+  found the layer under the finger had changed, and declined: no `mousedown`,
+  no `mouseup`, no `click`.
+
+  The effect was total and baffling in equal measure. **Every** button inside
+  the scroller stopped responding — menus, likes, links — while the identical
+  component outside it worked, on phones only (`autoHide` is usually a
+  breakpoint away), and intermittently: a bar already up because you had just
+  scrolled left nothing to change, and the tap went through. It read as "this
+  one menu is broken".
+
+  `pointerenter` now sets `hovering` only for a **mouse or pen**. A touch
+  scroller still shows its bar while it scrolls, which is the whole of what an
+  overlay bar is for.
+
+  No API change.
+
 ## 0.1.1 — 2026-07-24
 
 ### Added

@@ -1,5 +1,20 @@
 # @surstromming/tooltip
 
+## 0.1.2 — 2026-07-26
+
+### Fixed
+
+- **A tip is placed and flipped correctly on a pinch-zoomed page**, and follows
+  the zoom rather than keeping a position measured before it. Same cause and
+  same fix as popover 0.1.3 — see its changelog.
+
+### Changed
+
+- Placement mechanics moved to `@surstromming/util`'s `useAnchored`
+  (a **new dependency**, `^0.1.1`), shared with Popover. The policy here is
+  unchanged and still the opposite one: a tip flips where a panel shifts, and is
+  never clipped. No API change.
+
 ## 0.1.1 — 2026-07-26
 
 ### Fixed

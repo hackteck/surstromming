@@ -156,7 +156,12 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   can't read custom properties).
 - `reset.scss` (design package) is the one CSS-emitting stylesheet: a small
   modern reset that puts `font`/`background`/`foreground` tokens on `body` (font
-  *loading* is separate, in `font-list.scss`). The app imports it **once** in `main.ts`;
+  *loading* is separate, in `font-list.scss`). It also gives interactive
+  elements **`touch-action: manipulation`**: a tap on a zoomable page could be
+  the first half of a double-tap-to-zoom, so Safari holds the `click` back
+  ~300ms to find out, and a menu that opens a third of a second after the finger
+  reads as broken. Scoped to those elements, never `body` — pinch and page
+  double-tap are still the reader's. The app imports it **once** in `main.ts`;
   custom-web-components imports it `?inline` to seed each shadow root. Component
   styles must only `@use` function/mixin files — anything that emits CSS would
   be duplicated into every SFC style block.
@@ -402,16 +407,43 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   sliding out from under its trigger; from the origin the width is settled
   before the position is applied. The cost is that the panel makes a containing
   block, which is only a problem for a `position: fixed` descendant — every
-  nested overlay teleports out instead. Every viewport edge those two composables
-  clamp, flip or clip against is read from **`document.documentElement`, never
-  `window.innerWidth`/`innerHeight`**: `innerWidth` is the *visual* viewport,
-  which Safari shrinks under pinch-zoom (a Mac trackpad pinch included), while
-  `position: fixed` and `getBoundingClientRect()` are both in the *layout* one.
-  Mixed, they describe different spaces — a panel clamped against a 1019px
-  visual width with its anchor at 1474 in the layout one landed 464px left of
-  its trigger, and a clip cut from the short visual height erased the panel
-  outright, which reads as a menu that won't open. Both `useAnchoredPosition` and
-  Tooltip's `useAnchoredTip` also start from **`onMounted`**, not only from the
+  nested overlay teleports out instead.
+
+  **Pinch-zoom is its own coordinate system, and this is where two releases went
+  wrong.** Zoom splits the viewport in two: the **layout** viewport keeps the
+  size the page was laid out at, and the **visual** viewport is the smaller
+  window the reader looks through and pans around inside it. Three facts, and
+  only the third is intuitive: `window.innerWidth`/`innerHeight` report the
+  *visual* viewport; WebKit reports `getBoundingClientRect()` against the
+  *visual* viewport too; and a `position: fixed` element is placed against the
+  **layout** one. So a measured rect and a written position are in different
+  spaces on Safari, and `visualOffset()` (util) is the one line that reconciles
+  them — `visualViewport.offsetLeft`/`offsetTop`, added to every rect on the way
+  in, under the same capability probe `@floating-ui/dom` uses
+  (`CSS.supports('-webkit-backdrop-filter', 'none')`, false in Blink since it
+  dropped the alias — **not** UA sniffing). Without it a menu is drawn
+  `offsetLeft` away from its trigger: hundreds of pixels to the left, or off
+  screen entirely once someone has panned right to reach a trailing control,
+  which reads as a ⋯ that highlights and does nothing. 0.1.2 moved the *bounds*
+  off `innerWidth` and onto `document.documentElement` and changed nothing,
+  because the bound was never the half that was wrong.
+
+  The bounds stay the **layout** viewport (`layoutViewport()`), and clamping
+  against the *visible* part instead was tried and reverted the same day. It
+  looks right — keep the panel where the reader is looking — and it makes the
+  panel chase them: the visible box moves with every pan, so the clamp re-answers
+  and the panel slides out from under its trigger and crawls along the screen
+  edge, 168px off it. Keeping a panel inside the *page* is a layout question
+  whose answer holds still, which is the same reason the anchor-tracking axis is
+  unclamped. `visualViewport`'s `resize` and `scroll` are still tracked — a pinch
+  fires them when `window` fires neither — because on WebKit both halves of the
+  conversion move together and a rect read mid-gesture has to re-converge.
+
+  All of that — the rects, the space, the bounds, the listeners, the overlay's
+  own size — is **`useAnchored` in util**, which Popover and Tooltip now share.
+  What is *not* shared is the policy: each passes in a `place` function, and
+  those stay opposite (below). They were two copies of one mechanism with two
+  different bugs in it. Both also start from **`onMounted`**, not only from the
   `open` watcher: handed `open: true` at mount there's no change to react to,
   and an unmeasured panel has no position at all — it landed in the body's flow,
   unstacked.
@@ -428,8 +460,12 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   was asked for and slides under the chrome; a tip is a label, and a label
   off-screen is no label. It's **not** clipped like Popover's panel — on the
   ladder's top rung (`tooltip`, 90) it is supposed to paint over the header.
-  Not reusing `useAnchoredPosition`: it has no `top` side, and its clip-path
-  chain is the behaviour a tooltip specifically must not have.
+  It does not reuse `useAnchoredPosition` — that one has no `top` side, and its
+  clip-path chain is the behaviour a tooltip specifically must not have. What it
+  reuses is everything *under* both: `useAnchored`. The split is mechanism from
+  policy, and the reason to draw it there is that the mechanism is where the
+  hard-won cross-browser knowledge lives — fixing pinch-zoom in one copy and not
+  the other is exactly what happened before the extraction.
 - `SidebarGroup`'s action menu passes `side` opposite the sidebar (`left`
   sidebar → menu opens `right`, toward the content; the flip is also what RTL
   will want) and `layer: 'menu'` — above the sidebar's rung, because the mobile
@@ -467,7 +503,20 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   no gutter. The old
   fading behaviour lives on as **`autoHide`** (default `false`, replacing the
   inverted `alwaysVisible`): the bar floats over the content, fades out when
-  idle and returns on hover/drag/scroll. It's the one mode that drops the gutter
+  idle and returns on drag/scroll — and on **hover, from a mouse or a pen but
+  never a finger**. That last word is load-bearing. iOS fires `pointerenter` for
+  a touch, on every tap, and taking it for a hover flipped an idle bar visible
+  *during* the gesture: `.isHidden` drops `pointer-events: none`, so a
+  full-height strip appeared over the content between the finger going down and
+  coming up. WebKit re-hit-tests at `touchend` to synthesize the click, found
+  the layer under the finger had changed, and declined — no `mousedown`, no
+  `mouseup`, no `click`. **Every** button inside the scroller went dead while
+  the same component outside it worked, on phones only, and intermittently (a
+  bar already up because you'd just scrolled left nothing to change). It cost a
+  consuming app a day of bisecting to find, because it presents as one broken
+  menu rather than as a scroller bug. A touch scroller still shows its bar while
+  it *scrolls*, which is the whole of what an overlay bar is for.
+  It's the one mode that drops the gutter
   (a bar that comes and goes can't reserve space without the layout jumping) and
   the one that gets a `background` wash, since only then does it cover content. Only the paint is ours — the viewport is a real scroll
   container, so wheel/keyboard/`scrollIntoView` are untouched; the bar is
@@ -638,7 +687,8 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   workflow writes it right before `vercel build` (the only thing that reads
   it), pinning what the dashboard would otherwise guess: `framework: vite`,
   `npm install` (workspaces), `npm run build`, `dist`, plus the rewrite.
-- **Deploy:** `.github/workflows/vercel.yml` (manual dispatch) uses the Vercel
+- **Deploy:** `.github/workflows/vercel.yml` (every push to `master`, plus
+  manual dispatch for a redeploy with no commit behind it) uses the Vercel
   prebuilt flow — `vercel link --project <package.json name>` → `pull` →
   `build --prod` → `deploy --prebuilt --prod`, then `remove --safe` for old
   deployments. `vercel build` runs the install itself (no `npm ci` step);
@@ -692,6 +742,20 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   the layout viewport rather than the visual one). Popover's five dependents
   moved with it again — select, combobox, date-picker to `0.1.2`, dropdown-menu
   and sidebar-group to `0.1.3` — and tooltip has none.
+  Fifth: **util → 0.1.1, popover → 0.1.3, tooltip → 0.1.2** (2026-07-26, the
+  real pinch-zoom fix and the `useAnchored` extraction that carries it). util is
+  additive, so only the two packages that use the new export ask for `^0.1.1`;
+  everything else stays on `^0.1.0`. Popover's dependents moved again — select,
+  combobox, date-picker to `0.1.3`, dropdown-menu and sidebar-group to `0.1.4`.
+  **design → 0.1.1** rides along (`touch-action: manipulation` in the reset).
+  **Held back from npm** at the user's request until the fix is confirmed on a
+  real iPhone; YMusic links the whole of `packages/*` through an npm
+  `workspaces` entry meanwhile — which does work across repos, with a plain
+  relative path (`../surstromming/packages/*`).
+  Sixth, in the same batch: **scroll-area → 0.1.2** (a touch read as a hover,
+  which killed every tap inside an `autoHide` scroller — see ScrollArea above).
+  Its four dependents moved with it — dialog `0.1.1`, sidebar `0.1.1`, table
+  `0.1.2`, popover `0.1.4` — and popover's five moved again behind it.
   `npm run release` / `release:dry` must run **from the repo root** — invoked
   from inside a package directory, npm silently scopes them to that one
   package. They publish **every** workspace, though, which independent versions
