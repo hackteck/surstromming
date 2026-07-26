@@ -123,7 +123,12 @@ watch(open, async (isOpen) => {
     await nextTick()
     focusEdge('start')
   } else if (menu.value?.contains(document.activeElement)) {
-    trigger?.focus()
+    // `preventScroll`, because what usually closes a menu is a press somewhere
+    // else, and this runs before that press has focused what it hit. Scrolling
+    // the trigger back into view drags the page to wherever its row happens to
+    // be — in a long list, nowhere near what the reader is looking at. The
+    // press then puts focus where it belongs, so only the scroll is given up.
+    trigger?.focus({ preventScroll: true })
   }
 })
 

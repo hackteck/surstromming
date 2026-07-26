@@ -677,6 +677,9 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   `^0.1.1` (sidebar-group's `dropdown-menu` with it), so a consumer with an old
   lockfile gets the fixed popover instead of the panel sliding into place. Their
   own source is untouched and each changelog says so.
+  Third: **dropdown-menu → 0.1.2** (2026-07-26, `preventScroll` on the focus
+  handed back to the trigger). Its one dependent, sidebar-group, moved to
+  `0.1.2` with it on the same "make the fix the floor" reasoning.
   `npm run release` / `release:dry` must run **from the repo root** — invoked
   from inside a package directory, npm silently scopes them to that one
   package. They publish **every** workspace, though, which independent versions
