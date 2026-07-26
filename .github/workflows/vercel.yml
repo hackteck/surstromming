@@ -1,6 +1,11 @@
 name: Vercel deploy
 
-on: workflow_dispatch
+# Every push to master ships the preview site. `workflow_dispatch` stays, for a
+# redeploy with no commit behind it.
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
 
 env:
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
