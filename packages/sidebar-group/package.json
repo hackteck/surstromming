@@ -1,6 +1,6 @@
 {
   "name": "@surstromming/sidebar-group",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A labelled group of sidebar navigation, rendered from data.",
   "license": "MIT",
   "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
@@ -28,7 +28,8 @@
     "**/*.css"
   ],
   "files": [
-    "src"
+    "src",
+    "CHANGELOG.md"
   ],
   "main": "./src/index.ts",
   "module": "./src/index.ts",
@@ -38,9 +39,9 @@
   },
   "dependencies": {
     "@surstromming/design": "^0.1.0",
-    "@surstromming/dropdown-menu": "^0.1.0",
+    "@surstromming/dropdown-menu": "^0.1.1",
     "@surstromming/icon": "^0.1.0",
-    "@surstromming/popover": "^0.1.0"
+    "@surstromming/popover": "^0.1.1"
   },
   "peerDependencies": {
     "vue": "^3.4.0"

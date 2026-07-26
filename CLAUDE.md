@@ -393,7 +393,16 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   would remove it. Clamping needs the panel's own size (a
   right/bottom edge only becomes a left/top once you know how wide it is),
   measured on open inside `nextTick` so the clamped position is the first one
-  painted, and kept fresh by a `ResizeObserver`. Both `useAnchoredPosition` and
+  painted, and kept fresh by a `ResizeObserver`. That measurement is also why
+  the panel is parked at the viewport's origin and moved by **`transform`, never
+  by `top`/`left`**: an inset offset is *also* the room a shrink-to-fit box has
+  left to grow into, so a panel placed 374px along a 430px viewport measured
+  56px wide — which moved it left, which let it grow, which moved it again. The
+  `ResizeObserver` walked that loop a frame at a time and it read as the menu
+  sliding out from under its trigger; from the origin the width is settled
+  before the position is applied. The cost is that the panel makes a containing
+  block, which is only a problem for a `position: fixed` descendant — every
+  nested overlay teleports out instead. Both `useAnchoredPosition` and
   Tooltip's `useAnchoredTip` also start from **`onMounted`**, not only from the
   `open` watcher: handed `open: true` at mount there's no change to react to,
   and an unmeasured panel has no position at all — it landed in the body's flow,
@@ -660,6 +669,14 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   the prop it uses. Then `npm install`, so the lockfile's `packages/*` entries
   follow — it pins the old version otherwise.
   First bump: **scroll-area + table → 0.1.1** (2026-07-24, `orientation`).
+  Second: **popover → 0.1.1** (2026-07-26, the `transform` placement fix). Its
+  five dependents — select, combobox, dropdown-menu, date-picker, sidebar-group
+  — were bumped to `0.1.1` too **on request**, against the "only what changed"
+  rule: `^0.1.0` already accepts the fix, so nothing forced it. The point was to
+  make the fix the *floor* rather than a lucky resolution — each range moved to
+  `^0.1.1` (sidebar-group's `dropdown-menu` with it), so a consumer with an old
+  lockfile gets the fixed popover instead of the panel sliding into place. Their
+  own source is untouched and each changelog says so.
   `npm run release` / `release:dry` must run **from the repo root** — invoked
   from inside a package directory, npm silently scopes them to that one
   package. They publish **every** workspace, though, which independent versions
