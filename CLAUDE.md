@@ -402,7 +402,15 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   sliding out from under its trigger; from the origin the width is settled
   before the position is applied. The cost is that the panel makes a containing
   block, which is only a problem for a `position: fixed` descendant — every
-  nested overlay teleports out instead. Both `useAnchoredPosition` and
+  nested overlay teleports out instead. Every viewport edge those two composables
+  clamp, flip or clip against is read from **`document.documentElement`, never
+  `window.innerWidth`/`innerHeight`**: `innerWidth` is the *visual* viewport,
+  which Safari shrinks under pinch-zoom (a Mac trackpad pinch included), while
+  `position: fixed` and `getBoundingClientRect()` are both in the *layout* one.
+  Mixed, they describe different spaces — a panel clamped against a 1019px
+  visual width with its anchor at 1474 in the layout one landed 464px left of
+  its trigger, and a clip cut from the short visual height erased the panel
+  outright, which reads as a menu that won't open. Both `useAnchoredPosition` and
   Tooltip's `useAnchoredTip` also start from **`onMounted`**, not only from the
   `open` watcher: handed `open: true` at mount there's no change to react to,
   and an unmeasured panel has no position at all — it landed in the body's flow,
@@ -680,6 +688,10 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   Third: **dropdown-menu → 0.1.2** (2026-07-26, `preventScroll` on the focus
   handed back to the trigger). Its one dependent, sidebar-group, moved to
   `0.1.2` with it on the same "make the fix the floor" reasoning.
+  Fourth: **popover → 0.1.2 and tooltip → 0.1.1** (2026-07-26, placing against
+  the layout viewport rather than the visual one). Popover's five dependents
+  moved with it again — select, combobox, date-picker to `0.1.2`, dropdown-menu
+  and sidebar-group to `0.1.3` — and tooltip has none.
   `npm run release` / `release:dry` must run **from the repo root** — invoked
   from inside a package directory, npm silently scopes them to that one
   package. They publish **every** workspace, though, which independent versions

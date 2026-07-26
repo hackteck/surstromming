@@ -5,6 +5,23 @@ import type { PopoverAlign, PopoverSide } from '../index'
 /** Kept clear of the viewport edges when a panel has to be shifted inwards. */
 const VIEWPORT_MARGIN = 8
 
+/**
+ * The **layout** viewport — the one `position: fixed` resolves against, and the
+ * one every `getBoundingClientRect()` below is measured in. `innerWidth` /
+ * `innerHeight` are the *visual* viewport, which Safari shrinks while the page
+ * is pinch-zoomed (a trackpad pinch on a Mac counts, and on iOS it is the
+ * normal state of an over-zoomed page). Mix the two and the numbers stop
+ * describing the same space; both ways that goes wrong are bad. A panel clamped
+ * against a 1019px visual width while its anchor sits at 1474 in the layout one
+ * lands 464px to the left of its own trigger — and a clip built from the short
+ * visual height cuts the panel away completely, which reads as a menu that flat
+ * refuses to open.
+ */
+const viewport = () => ({
+  width: document.documentElement.clientWidth,
+  height: document.documentElement.clientHeight,
+})
+
 export interface AnchoredPlacement {
   side: PopoverSide
   align: PopoverAlign
@@ -72,7 +89,8 @@ export const useAnchoredPosition = (
   const measure = () => {
     anchorRect.value = anchor.value?.getBoundingClientRect() ?? null
 
-    let clip = { top: 0, right: window.innerWidth, bottom: window.innerHeight, left: 0 }
+    const { width, height } = viewport()
+    let clip = { top: 0, right: width, bottom: height, left: 0 }
     for (const element of clippers) {
       const rect = element.getBoundingClientRect()
       if (element.scrollHeight > element.clientHeight) {
@@ -145,7 +163,7 @@ export const useAnchoredPosition = (
     if (side === 'bottom') {
       const left = align === 'start' ? rect.left : rect.right - width
       const top = rect.bottom
-      const x = clamp(left, width, window.innerWidth)
+      const x = clamp(left, width, viewport().width)
       return {
         ...base,
         // `top` follows the anchor, all the way out.
@@ -156,7 +174,7 @@ export const useAnchoredPosition = (
     }
 
     const x = side === 'right' ? rect.right : rect.left - width
-    const y = clamp(align === 'start' ? rect.top : rect.bottom - height, height, window.innerHeight)
+    const y = clamp(align === 'start' ? rect.top : rect.bottom - height, height, viewport().height)
     return {
       ...base,
       transform: `translate(${x}px, ${y}px)`,

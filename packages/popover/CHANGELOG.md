@@ -1,5 +1,25 @@
 # @surstromming/popover
 
+## 0.1.2 — 2026-07-26
+
+### Fixed
+
+- **The panel is placed against the layout viewport, not the visual one.**
+  `window.innerWidth` / `innerHeight` describe the *visual* viewport, which
+  Safari shrinks while the page is pinch-zoomed — a trackpad pinch on a Mac
+  counts, and on iOS it is the normal state of a page someone has zoomed into.
+  `position: fixed` and `getBoundingClientRect()` both work in the *layout*
+  viewport, so mixing the two had the numbers describing different spaces, and
+  both ways it went wrong were bad: clamping a panel against a 1019px visual
+  width while its anchor sat at 1474 in the layout one put the panel 464px to
+  the left of its own trigger, and the clip built from the short visual height
+  cut a 142px panel by 174px — erasing it, which reads as a menu that flat
+  refuses to open. Now read from `document.documentElement`, which is the
+  layout viewport in every browser.
+
+  No API change, and nothing moves on an unzoomed page: the two viewports are
+  the same size there.
+
 ## 0.1.1 — 2026-07-26
 
 ### Fixed

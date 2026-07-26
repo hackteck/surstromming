@@ -1,6 +1,6 @@
 {
   "name": "@surstromming/popover",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Panel anchored under a trigger; closes on outside click and Escape.",
   "license": "MIT",
   "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",

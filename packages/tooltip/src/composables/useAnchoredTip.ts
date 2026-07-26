@@ -6,6 +6,18 @@ const GAP = 6
 /** Kept clear of the viewport edges when the tip has to be shifted inwards. */
 const MARGIN = 8
 
+/**
+ * The **layout** viewport — what `position: fixed` resolves against, and what
+ * every `getBoundingClientRect()` below is measured in. `innerWidth` /
+ * `innerHeight` are the *visual* viewport, which Safari shrinks while the page
+ * is pinch-zoomed; mixed with the rects they describe a different space, and the
+ * tip flips or clamps against an edge that isn't where it thinks it is.
+ */
+const viewport = () => ({
+  width: document.documentElement.clientWidth,
+  height: document.documentElement.clientHeight,
+})
+
 const OPPOSITE: Record<TooltipSide, TooltipSide> = {
   top: 'bottom',
   bottom: 'top',
@@ -58,11 +70,12 @@ export const useAnchoredTip = (
     if (!rect) return want
 
     const { width, height } = tipSize.value
+    const bounds = viewport()
     const fits: Record<TooltipSide, boolean> = {
       top: rect.top - height - GAP >= MARGIN,
-      bottom: rect.bottom + height + GAP <= window.innerHeight - MARGIN,
+      bottom: rect.bottom + height + GAP <= bounds.height - MARGIN,
       left: rect.left - width - GAP >= MARGIN,
-      right: rect.right + width + GAP <= window.innerWidth - MARGIN,
+      right: rect.right + width + GAP <= bounds.width - MARGIN,
     }
     return fits[want] || !fits[OPPOSITE[want]] ? want : OPPOSITE[want]
   })
@@ -76,12 +89,12 @@ export const useAnchoredTip = (
 
     if (side.value === 'top' || side.value === 'bottom') {
       const top = side.value === 'top' ? rect.top - height - GAP : rect.bottom + GAP
-      const left = clamp(rect.left + rect.width / 2 - width / 2, width, window.innerWidth)
+      const left = clamp(rect.left + rect.width / 2 - width / 2, width, viewport().width)
       return { position: 'fixed' as const, top: `${top}px`, left: `${left}px` }
     }
 
     const left = side.value === 'left' ? rect.left - width - GAP : rect.right + GAP
-    const top = clamp(rect.top + rect.height / 2 - height / 2, height, window.innerHeight)
+    const top = clamp(rect.top + rect.height / 2 - height / 2, height, viewport().height)
     return { position: 'fixed' as const, top: `${top}px`, left: `${left}px` }
   })
 
