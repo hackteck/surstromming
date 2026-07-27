@@ -37,12 +37,23 @@ const classes = computed(() => [
   backdrop-filter: blur(4px);
   opacity: 0;
   visibility: hidden; // fully out of the way when faded out
+  // Deliberately outside the transition below. `visibility` interpolates as a
+  // step that holds `visible` for the *whole* duration and flips only at the
+  // end — which is exactly what lets the scrim fade out instead of vanishing,
+  // and also what left it hit-testable at 3% opacity, 190ms after it stopped
+  // being wanted. A full-viewport `inset: 0` element then swallows every press
+  // on the page: close a drawer, reach for the control beside it, and the tap
+  // goes nowhere at all. `pointer-events` carries no transition, so dropping
+  // the class stops it capturing on the very frame the close begins, while the
+  // fade plays out behind it.
+  pointer-events: none;
   transition: opacity 0.2s ease, visibility 0.2s;
 }
 
 .isVisible {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto; // the scrim is the click target that closes what it dims
 }
 
 @media (prefers-reduced-motion: reduce) {

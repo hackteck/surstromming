@@ -1,6 +1,6 @@
 {
   "name": "@surstromming/backdrop",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Dimmed full-screen overlay behind drawers and dialogs.",
   "license": "MIT",
   "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
@@ -28,7 +28,8 @@
     "**/*.css"
   ],
   "files": [
-    "src"
+    "src",
+    "CHANGELOG.md"
   ],
   "main": "./src/index.ts",
   "module": "./src/index.ts",

@@ -212,6 +212,15 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   reparents it, which resets CSS transitions — resize never plays the
   open/close animation. Stacking is declared in SCSS — the drawer on the
   `sidebar` rung, its Backdrop (`layer="sidebar"`) one step under.
+  **A faded-out scrim must also stop taking presses**, and `visibility` alone
+  does not do it: it interpolates as a step that stays `visible` for the whole
+  transition and flips only at the end — which is exactly what makes a fade-out
+  a fade rather than a disappearance, and also what left a full-viewport
+  `inset: 0` element hit-testable at 3% opacity, 190ms after it was dismissed.
+  Every press on the page went to it in that window. `pointer-events: none` on
+  the base and `auto` on `.isVisible` fixes it, because `pointer-events` carries
+  no transition and so drops on the frame the close begins. Measured, not
+  reasoned: a mouse click in that window was lost too, so it is not a touch bug.
 
 ## Workflow
 
