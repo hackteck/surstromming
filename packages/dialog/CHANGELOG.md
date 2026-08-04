@@ -1,5 +1,18 @@
 # @surstromming/dialog
 
+## 0.1.3 — 2026-08-04
+
+### Fixed
+
+- Attributes now reach the panel. The root is a fragment (`Backdrop` +
+  `Teleport`), so Vue dropped fallthrough attrs entirely: `class` landed
+  nowhere, and the panel's 30rem `max-width` could not be overridden, which made
+  a wide dialog impossible. Now `inheritAttrs: false` with `v-bind="$attrs"` on
+  the panel, as this repo's own rule requires for a multi-node root.
+
+  To override the width, the selector has to outrank the library's single class
+  — `.wide.wide { max-width: 58rem }` — rather than reach for `!important`.
+
 ## 0.1.2 — 2026-07-26
 
 ### Fixed
