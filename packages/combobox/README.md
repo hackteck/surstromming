@@ -21,6 +21,7 @@ graph LR
   combobox --> popover
   popover --> design
   popover --> scroll_area
+  popover --> util
   scroll_area --> design
   scroll_area --> util
 ```
@@ -55,6 +56,11 @@ const frameworks: ComboboxOption[] = [
 | `searchPlaceholder` | `string`           | `Search…`        |                                    |
 | `emptyText`         | `string`           | `Nothing found.` | Shown when nothing matches         |
 | `disabled`          | `boolean`          | `false`          |                                    |
+| `layer`             | `popover \| menu \| modal` | `popover` | Rung of the stacking ladder      |
+
+`layer` is forwarded to [`Popover`](../popover). Inside a
+[`Dialog`](../dialog) pass `modal`, or the panel is drawn at 30 under a dialog
+at 70.
 
 `id` · `aria-*` fall through **to the trigger button** (`inheritAttrs: false`).
 

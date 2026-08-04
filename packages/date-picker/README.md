@@ -27,6 +27,7 @@ graph LR
   date_picker --> popover
   popover --> design
   popover --> scroll_area
+  popover --> util
   scroll_area --> design
   scroll_area --> util
 ```
@@ -61,6 +62,11 @@ const today = new Date()
 | `weekStartsOn`  | `sunday \| monday`         | `monday`       | Forwarded to the calendar                    |
 | `locale`        | `string`                   | —              | Label and calendar; omitted means the browser's |
 | `disabled`      | `boolean`                  | `false`        |                                              |
+| `layer`         | `popover \| menu \| modal` | `popover`      | Rung of the stacking ladder                  |
+
+`layer` is forwarded to [`Popover`](../popover). Inside a
+[`Dialog`](../dialog) pass `modal`, or the calendar is drawn at 30 under a
+dialog at 70.
 
 ### Fallthrough
 

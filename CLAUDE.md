@@ -135,8 +135,10 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   SCSS; no number lives in TS.** Fixed-layer overlays just declare it (Header,
   Tooltip, Dialog's overlay at `modal`, Sidebar's drawer at `sidebar`, Toaster
   at `toast`) and have no stacking prop at all. Where the layer genuinely varies
-  the prop is a **name, not a number** — `layer` on `Popover`/`DropdownMenu`
-  (`popover | menu | modal`) and on `Backdrop` (`backdrop | sidebar | modal`),
+  the prop is a **name, not a number** — `layer` on `Popover` and everything
+  that wraps it (`DropdownMenu`, `Select`, `Combobox`, `DatePicker`,
+  `SidebarGroup`) (`popover | menu | modal`), and on `Backdrop`
+  (`backdrop | sidebar | modal`),
   selecting a `.layer-<name>` class exactly like the `variant-*` families —
   written as one, too, in `src/css/popover-layers.scss` /
   `backdrop-layers.scss`. That
@@ -252,6 +254,13 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   alert, toast, progress, badge, separator, card, avatar, tooltip,
   dropdown-menu, dialog, custom-web-components, table, pagination, data-table,
   scroll-area, calendar, date-picker, chart, button-group.
+  **Not on the docs site** (no `*Demo.vue`, no registry entry, README only):
+  icon, label, popover, backdrop, sidebar, sidebar-group, header. The last four
+  are demonstrated *by the app shell itself*, and Popover by everything built on
+  it — but a consumer installing one of those packages has nothing to look at.
+  `DialogDemo` carries the one **overlay-inside-overlay** example (a `Select`
+  with `layer="modal"`), because that combination is where the stacking prop
+  stops being theoretical.
 - `custom-web-components` is the **one compiled package** (all others ship raw
   `.vue`); it exports **components** (`Button`) plus `util` (`defineElement`)
   — the consumer turns a component into a **shadow-DOM**
@@ -369,7 +378,23 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   on that inner input, so a `Label`'s `for` lands on the right element.
 - `Popover` (outside-click/Escape dismissal) is the
   shared shell under `Select`, `Combobox` and `DropdownMenu`; the data-driven
-  ones keep focus on the trigger. It **teleports its panel to `<body>` and
+  ones keep focus on the trigger. Every one of them **forwards `layer`** —
+  `Select`, `Combobox`, `DatePicker`, `DropdownMenu`, `SidebarGroup` — because
+  the default `popover` rung (30) is wrong in exactly one place and it's a
+  common one: inside a `Dialog` (70) the panel opens *behind* the dialog. The
+  prop is the fix (`layer="modal"`), not a heuristic — a component can't know
+  what it was mounted inside, and guessing from the DOM would be a lie the one
+  time it guessed wrong.
+  **An open panel owns Escape**, and that takes the **capture phase**: Dialog
+  listens for Escape on its own panel, a `Select` trigger sits inside that
+  panel, so one press closed the list *and* the dialog behind it (measured, not
+  reasoned). Popover's `keydown` is registered with `capture: true` and
+  `stopPropagation`s, so it runs before the event reaches anything below. The
+  same is **deliberately not done for `mousedown`**: an outside press on a
+  dialog's own overlay still dismisses both, and buying the same rule there
+  would mean swallowing `mousedown` page-wide while a popover is open — which
+  is where sliders and drag handles start their gestures. A key nobody drags
+  with is safe to claim; a press is not. It **teleports its panel to `<body>` and
   positions it `fixed`** from the trigger's measured rect — so no ancestor's
   `overflow` clips it (a menu opens cleanly out of the scrolling sidebar). The
   rect is re-measured on scroll (capture-phase, since any ancestor scrolling
@@ -765,6 +790,16 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   which killed every tap inside an `autoHide` scroller — see ScrollArea above).
   Its four dependents moved with it — dialog `0.1.1`, sidebar `0.1.1`, table
   `0.1.2`, popover `0.1.4` — and popover's five moved again behind it.
+  Seventh: **backdrop → 0.1.1** (2026-07-26, the scrim swallowing presses while
+  it fades out); its two dependents moved with it — dialog `0.1.2`, sidebar
+  `0.1.2`.
+  Eighth: **popover → 0.1.5** (2026-08-04, an open panel owns `Escape`) and
+  **select / combobox / date-picker → 0.1.5** (the `layer` prop). A new prop is
+  a **patch** here, following `scroll-area@0.1.1`'s `orientation` — additive, so
+  nothing to break. Popover's other two dependents moved on the "make the fix
+  the floor" rule again: dropdown-menu and sidebar-group → `0.1.6`.
+  The earlier **"held back from npm"** note is spent — the registry is level
+  with the repo, so `npm view <pkg> version` is the check before any bump.
   `npm run release` / `release:dry` must run **from the repo root** — invoked
   from inside a package directory, npm silently scopes them to that one
   package. They publish **every** workspace, though, which independent versions

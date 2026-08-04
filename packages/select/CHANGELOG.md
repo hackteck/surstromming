@@ -1,5 +1,20 @@
 # @surstromming/select
 
+## 0.1.5 — 2026-08-04
+
+### Added
+
+- **`layer`** (`popover | menu | modal`, default `popover`), forwarded to
+  `Popover`. Inside a `Dialog` pass `modal` — the list is drawn on the `popover`
+  rung (30) otherwise, while the dialog sits at 70, and the options open behind
+  it.
+
+### Fixed
+
+- Requires `@surstromming/popover@^0.1.5`, so `Escape` with the list open closes
+  the list only, not the dialog around it. See popover's changelog for the
+  detail.
+
 ## 0.1.4 — 2026-07-26
 
 ### Fixed

@@ -1,5 +1,5 @@
 <template>
-  <Popover v-model:open="open">
+  <Popover v-model:open="open" :layer="layer">
     <template #trigger>
       <button
         :class="triggerClasses"
@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useCssModule, useTemplateRef, watch } from 'vue'
 import { Icon } from '@surstromming/icon'
-import { Popover } from '@surstromming/popover'
+import { Popover, type PopoverLayer } from '@surstromming/popover'
 import { Check, ChevronDown } from 'lucide'
 import type { SelectOption, SelectSize } from './index'
 
@@ -50,8 +50,15 @@ const props = withDefaults(
     placeholder?: string
     size?: SelectSize
     disabled?: boolean
+    /**
+     * Which rung the list opens on. `popover` is right almost always — but a
+     * Select **inside a Dialog** needs `modal`, or its list is drawn at 30
+     * while the dialog sits at 70 and the options open behind it. Same prop,
+     * same reason, as DropdownMenu's.
+     */
+    layer?: PopoverLayer
   }>(),
-  { placeholder: 'Select…', size: 'md' },
+  { placeholder: 'Select…', size: 'md', layer: 'popover' },
 )
 
 const model = defineModel<string>()

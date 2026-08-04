@@ -21,14 +21,16 @@ graph LR
   util["@surstromming/util"]
   sidebar_group --> design
   sidebar_group --> dropdown_menu
+  sidebar_group --> icon
+  sidebar_group --> popover
   dropdown_menu --> design
   dropdown_menu --> icon
   dropdown_menu --> popover
   popover --> design
   popover --> scroll_area
+  popover --> util
   scroll_area --> design
   scroll_area --> util
-  sidebar_group --> icon
 ```
 
 ## Usage

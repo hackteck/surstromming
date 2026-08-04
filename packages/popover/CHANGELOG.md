@@ -1,5 +1,24 @@
 # @surstromming/popover
 
+## 0.1.5 — 2026-08-04
+
+### Fixed
+
+- **An open panel now owns `Escape`.** A `Select` inside a `Dialog` sits in the
+  dialog's own panel, and that panel is where the dialog listens for `Escape` —
+  so one press closed the list *and* the dialog behind it. Measured, not
+  reasoned.
+
+  The `keydown` listener is registered with `capture: true` and stops the event,
+  so it runs before anything below it can see the key. Dismissal is otherwise
+  unchanged, and a popover with nothing under it behaves exactly as before.
+
+  The same is **deliberately not done for `mousedown`**: an outside press on a
+  dialog's own overlay still dismisses both. Claiming that gesture would mean
+  swallowing `mousedown` page-wide while a panel is open, and that is where
+  sliders, drag handles and text selection start theirs. A key nobody drags
+  with is safe to claim; a press is not.
+
 ## 0.1.4 — 2026-07-26
 
 ### Fixed

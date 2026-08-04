@@ -1,5 +1,5 @@
 <template>
-  <Popover v-model:open="open">
+  <Popover v-model:open="open" :layer="layer">
     <template #trigger>
       <Button
         :class="triggerClasses"
@@ -32,7 +32,7 @@ import { computed, useCssModule } from 'vue'
 import { Button } from '@surstromming/button'
 import { Calendar, type WeekStart } from '@surstromming/calendar'
 import { Icon } from '@surstromming/icon'
-import { Popover } from '@surstromming/popover'
+import { Popover, type PopoverLayer } from '@surstromming/popover'
 import { CalendarDays } from 'lucide'
 
 // The trigger is the focusable control — id/aria belong on it, not the wrapper.
@@ -50,8 +50,13 @@ const props = withDefaults(
     /** BCP 47 tag for the label and the calendar; omitted means the browser's. */
     locale?: string
     disabled?: boolean
+    /**
+     * Which rung the calendar opens on. Inside a Dialog it has to be `modal`,
+     * or the month is drawn at 30 under a dialog at 70 — see Select's.
+     */
+    layer?: PopoverLayer
   }>(),
-  { placeholder: 'Pick a date', weekStartsOn: 'monday' },
+  { placeholder: 'Pick a date', weekStartsOn: 'monday', layer: 'popover' },
 )
 
 const model = defineModel<Date | null>({ default: null })

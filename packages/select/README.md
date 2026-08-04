@@ -18,6 +18,7 @@ graph LR
   select --> popover
   popover --> design
   popover --> scroll_area
+  popover --> util
   scroll_area --> design
   scroll_area --> util
 ```
@@ -52,6 +53,11 @@ const fruits: SelectOption[] = [
 | `placeholder` | `string`          | `Select…`   | Shown, dimmed, until something is picked |
 | `size`        | `sm \| md \| lg`  | `md`        | Heights match `Input` and `Button`      |
 | `disabled`    | `boolean`         | `false`     |                                         |
+| `layer`       | `popover \| menu \| modal` | `popover` | Rung of the stacking ladder — see below |
+
+`layer` is forwarded to [`Popover`](../popover). `popover` (30) is right almost
+everywhere; a Select **inside a [`Dialog`](../dialog)** needs `modal`, or the
+list is drawn at 30 while the dialog sits at 70 and the options open behind it.
 
 `id` · `aria-*` fall through **to the trigger button** (`inheritAttrs: false`)
 — it's the focusable control.

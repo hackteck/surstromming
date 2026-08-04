@@ -1,5 +1,14 @@
 # @surstromming/sidebar-group
 
+## 0.1.6 — 2026-08-04
+
+### Fixed
+
+- Requires `@surstromming/popover@^0.1.5` and
+  `@surstromming/dropdown-menu@^0.1.6`, so `Escape` with an action menu open
+  closes the menu only, not a dialog around it. See popover's changelog for the
+  detail. No change in this package's own source or API.
+
 ## 0.1.5 — 2026-07-26
 
 ### Fixed

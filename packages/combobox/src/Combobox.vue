@@ -1,5 +1,5 @@
 <template>
-  <Popover v-model:open="open">
+  <Popover v-model:open="open" :layer="layer">
     <template #trigger>
       <button
         :class="$style.trigger"
@@ -49,7 +49,7 @@
 import { computed, nextTick, ref, useCssModule, useTemplateRef, watch } from 'vue'
 import { Icon } from '@surstromming/icon'
 import { Input } from '@surstromming/input'
-import { Popover } from '@surstromming/popover'
+import { Popover, type PopoverLayer } from '@surstromming/popover'
 import { Check, ChevronsUpDown } from 'lucide'
 import type { ComboboxOption } from './index'
 
@@ -63,11 +63,17 @@ const props = withDefaults(
     searchPlaceholder?: string
     emptyText?: string
     disabled?: boolean
+    /**
+     * Which rung the panel opens on. Inside a Dialog it has to be `modal`, or
+     * the panel is drawn at 30 under a dialog at 70 — see Select's.
+     */
+    layer?: PopoverLayer
   }>(),
   {
     placeholder: 'Select…',
     searchPlaceholder: 'Search…',
     emptyText: 'Nothing found.',
+    layer: 'popover',
   },
 )
 

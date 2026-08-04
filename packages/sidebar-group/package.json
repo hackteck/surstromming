@@ -1,6 +1,6 @@
 {
   "name": "@surstromming/sidebar-group",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A labelled group of sidebar navigation, rendered from data.",
   "license": "MIT",
   "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
@@ -39,9 +39,9 @@
   },
   "dependencies": {
     "@surstromming/design": "^0.1.0",
-    "@surstromming/dropdown-menu": "^0.1.5",
+    "@surstromming/dropdown-menu": "^0.1.6",
     "@surstromming/icon": "^0.1.0",
-    "@surstromming/popover": "^0.1.4"
+    "@surstromming/popover": "^0.1.5"
   },
   "peerDependencies": {
     "vue": "^3.4.0"

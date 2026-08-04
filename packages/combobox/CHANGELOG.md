@@ -1,5 +1,19 @@
 # @surstromming/combobox
 
+## 0.1.5 — 2026-08-04
+
+### Added
+
+- **`layer`** (`popover | menu | modal`, default `popover`), forwarded to
+  `Popover`. Inside a `Dialog` pass `modal`, or the panel is drawn at 30 under a
+  dialog at 70.
+
+### Fixed
+
+- Requires `@surstromming/popover@^0.1.5`, so `Escape` with the panel open
+  closes the panel only, not the dialog around it. See popover's changelog for
+  the detail.
+
 ## 0.1.4 — 2026-07-26
 
 ### Fixed

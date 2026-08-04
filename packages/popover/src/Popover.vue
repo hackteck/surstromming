@@ -51,20 +51,26 @@ const onPointerDown = (event: MouseEvent) => {
   open.value = false
 }
 
+// An open panel owns Escape, and that needs the capture phase: a Select inside
+// a Dialog sits in the dialog's own panel, which listens for Escape there, so
+// one press closed the list *and* the dialog behind it. Capturing at the
+// document means this runs before the event reaches either.
 const onKeydown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape') open.value = false
+  if (event.key !== 'Escape') return
+  event.stopPropagation()
+  open.value = false
 }
 
 const stopListening = () => {
   document.removeEventListener('mousedown', onPointerDown)
-  document.removeEventListener('keydown', onKeydown)
+  document.removeEventListener('keydown', onKeydown, true)
 }
 
 // Listeners only exist while open — no idle cost, nothing to clean up per instance.
 watch(open, (isOpen) => {
   if (isOpen) {
     document.addEventListener('mousedown', onPointerDown)
-    document.addEventListener('keydown', onKeydown)
+    document.addEventListener('keydown', onKeydown, true)
   } else {
     stopListening()
   }
