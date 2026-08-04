@@ -11,6 +11,7 @@
       <div v-if="open" :class="$style.overlay" @mousedown.self="onOutside">
         <div
           ref="panel"
+          v-bind="$attrs"
           :class="$style.panel"
           :role="role"
           aria-modal="true"
@@ -59,6 +60,10 @@ import { ScrollArea } from '@surstromming/scroll-area'
 import { X } from 'lucide'
 import { useModalFocus } from './composables/useModalFocus'
 import type { DialogRole } from './index'
+
+// Multi-node root (Backdrop + Teleport): attrs would be dropped, so `class`
+// never reached the panel and its width could not be overridden.
+defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(
   defineProps<{

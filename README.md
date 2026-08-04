@@ -54,6 +54,25 @@ Packages ship **raw source** (`.vue`, `.ts`, `.scss`) — your build compiles th
 - **sass** installed
 - **vue-tsc** for type checking (types come straight from the source)
 
+Two Vite settings are **required**, not optional. Neither is needed inside this monorepo — workspace
+symlinks are treated as source — so they only bite real consumers installing from npm:
+
+```ts
+// vite.config.ts
+export default defineConfig({
+  plugins: [vue()],
+  css: {
+    // Without this, `$style.menuButton` is silently undefined.
+    modules: { localsConvention: 'camelCase' },
+  },
+  optimizeDeps: {
+    // The packages ship raw .vue/.scss, which esbuild's dependency
+    // pre-bundler cannot parse. List the ones you install.
+    exclude: ['@surstromming/button', '@surstromming/design' /* … */],
+  },
+})
+```
+
 ## Setup
 
 Import the reset (and fonts, if you want the bundled Geist) once:
