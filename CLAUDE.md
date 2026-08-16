@@ -198,9 +198,13 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   `v-bind('props.zIndex')` and is now a `.layer-<name>` class.
 - The app shell is `design.layout($selector, $sidebarInset)` (layout.scss): a
   `grid-template-areas` grid over semantic direct children `aside` / `header` /
-  `main` — no wrapper divs, and a page's root element is `<main>`. An absent
-  child (route without a sidebar, drawer teleported away) collapses its `auto`
-  track. By default the sidebar runs full-height with the header beside it;
+  `main` / `footer` — no wrapper divs, and a page's root element is `<main>`.
+  An absent child (route without a sidebar, drawer teleported away, no footer
+  at all) collapses its `auto` track. The footer is a status-bar row spanning
+  the full width in both modes — beside a full-height sidebar too, since a
+  status bar stopping at the sidebar's edge reads as a fragment of one — and
+  the mixin gives it no styling of its own. By default the sidebar runs
+  full-height with the header beside it;
   `$sidebarInset: true` tucks it inside, below a full-width header. The shell
   is **viewport-locked** (`height: 100dvh`) and `main` is the scroller — with
   the document scrolling, the inset sidebar (sticky `top: 0`, starting *below*
@@ -367,6 +371,22 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   lock is **counted, not a boolean**: a dialog opened from inside another one
   handed the page's scroll back the moment *it* closed, and releasing now
   restores the page's own inline `overflow` rather than blanking it.
+  Initial focus honours **`autofocus`** inside the panel before falling back to
+  the first focusable — which is the ✕, so `Enter` on a freshly opened dialog
+  dismissed it instead of answering it, and a consumer could not override it (a
+  parent watcher on `open` loses the race to the dialog's own). On close, focus
+  returns to the opener **a macrotask later**: the browser runs a keydown's
+  default action — activating the focused element — after the microtask flush
+  the close happens in, so a synchronous return put the opener under that
+  activation and Enter-to-confirm clicked it and reopened the dialog. Real
+  mouse click behind it only; a synthetic `.click()` never focuses the button,
+  which is how a scripted check misses it. The body's slot
+  content sits in a **`div.content` with `spacing(1)` of padding**, and `.body`
+  takes the same back off its margin: a scroller clips at its own padding edge
+  and a full-width field ends exactly there, so `design.field`'s 3px ring was
+  shaved flat on both sides. The room has to be *inside* the scroller — a
+  negative margin on `.body` alone would push the content out of the box doing
+  the clipping.
 - `useImageStatus(srcRef)` (avatar) preloads a src off-DOM and reports
   idle/loading/loaded/error, so the image shows only once ready — a broken src
   never flashes. Exported for reuse.
@@ -798,6 +818,16 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   a **patch** here, following `scroll-area@0.1.1`'s `orientation` — additive, so
   nothing to break. Popover's other two dependents moved on the "make the fix
   the floor" rule again: dropdown-menu and sidebar-group → `0.1.6`.
+  Ninth: **dialog → 0.1.4** (2026-08-16, three in one: the body scroller
+  shaving focus rings; `autofocus` choosing where focus lands; and focus
+  returning to the opener a macrotask after close, because returning it
+  synchronously put the opener under the closing keydown's own activation and
+  the dialog reopened). All found by a consumer (NanosecEditor); no dependent
+  to carry along.
+  Tenth: **design → 0.1.2** (2026-08-16, `layout()` places a `footer` child —
+  a full-width status-bar row in both modes, collapsing to nothing when
+  absent). Additive; nothing else moves.
+  Both published 2026-08-16.
   The earlier **"held back from npm"** note is spent — the registry is level
   with the repo, so `npm view <pkg> version` is the check before any bump.
   `npm run release` / `release:dry` must run **from the repo root** — invoked

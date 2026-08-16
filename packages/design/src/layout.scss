@@ -1,26 +1,32 @@
-// App shell grid: direct `aside` / `header` / `main` children land in named
-// areas, so the app needs no wrapper elements. An absent child (no sidebar on
-// the route, drawer teleported away on mobile) collapses its `auto` track.
+// App shell grid: direct `aside` / `header` / `main` / `footer` children land
+// in named areas, so the app needs no wrapper elements. An absent child (no
+// sidebar on the route, drawer teleported away on mobile, no footer at all)
+// collapses its `auto` track.
 // The shell is viewport-locked and only `main` scrolls — with the document as
 // the scroller, a sticky sidebar below a sticky header slides up by the
 // header's height before pinning.
 // $sidebarInset: the sidebar sits inside the shell, below a full-width
-// header; otherwise it runs full height with the header beside it.
+// header; otherwise it runs full height with the header beside it. The footer
+// is a status bar and spans the full width in both modes — even beside a
+// full-height sidebar, a status bar stopping at the sidebar's edge reads as a
+// fragment of one.
 @mixin layout($selector: "#app", $sidebarInset: false) {
   #{$selector} {
     display: grid;
     height: 100dvh;
     grid-template-columns: auto 1fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto 1fr auto;
 
     @if $sidebarInset {
       grid-template-areas:
         'header header'
-        'sidebar main';
+        'sidebar main'
+        'footer footer';
     } @else {
       grid-template-areas:
         'sidebar header'
-        'sidebar main';
+        'sidebar main'
+        'footer footer';
     }
 
     > aside {
@@ -34,6 +40,10 @@
     > main {
       grid-area: main;
       overflow-y: auto;
+    }
+
+    > footer {
+      grid-area: footer;
     }
   }
 }

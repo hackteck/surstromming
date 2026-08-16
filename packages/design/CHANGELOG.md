@@ -1,5 +1,17 @@
 # @surstromming/design
 
+## 0.1.2 — 2026-08-16
+
+### Added
+
+- **`layout()` places a `footer` child.** The shell grid gains a third `auto`
+  row spanning the full width in both modes — a status bar stopping at the
+  sidebar's edge reads as a fragment of one — and `> footer` lands in it. With
+  no footer in the markup the row collapses to nothing, so existing apps render
+  identically; that is the same contract every other absent child already has.
+  The footer brings no styling of its own: like `aside` and `header`, what it
+  looks like is the app's business.
+
 ## 0.1.1 — 2026-07-26
 
 ### Fixed

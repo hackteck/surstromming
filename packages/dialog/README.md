@@ -98,16 +98,34 @@ div.overlay                    // fixed, centers the panel; outside-click target
   └─ div.panel[role]           // aria-modal, focus-trapped
        ├─ button.close         // ✕, dialog + dismissible only
        ├─ div.header           // title + description (or #header)
-       ├─ div.body             // <slot />
+       ├─ ScrollArea.body      // the only part that scrolls
+       │    └─ div.content     // <slot />
        └─ div.footer           // #footer
 ```
+
+`div.content` exists for one reason: a scroller clips at its own padding edge,
+and a full-width control ends exactly there — so the focus ring `design.field`
+paints *outside* the border box was cut flat. The wrapper pads by `spacing(1)`
+and `.body` takes the same off its margin, so the content still lines up with
+the header and the footer.
 
 ## Behavior & accessibility
 
 - **Focus trap** — opening moves focus to the first focusable inside (or the
   panel); `Tab`/`Shift+Tab` cycle within and can't escape. Closing returns
   focus to whatever was focused before, so the keyboard user lands back where
-  they left.
+  they left. The return is a macrotask behind the close: restored any sooner,
+  the closing keydown's own default action — activating the focused element —
+  lands on the opener and clicks it, and the dialog reopens. If you wire Enter
+  in a field to close the dialog, `preventDefault()` anyway
+  (`@keydown.enter.prevent`): it states that the press was consumed.
+- **`autofocus` picks the landing spot.** The first focusable is the ✕, which
+  is the wrong place to start a dialog that asks a question — `Enter` there
+  dismisses it instead of answering it. Mark the control you want and it wins:
+  `<Input v-model="path" autofocus />`. The first *visible* `[autofocus]` in the
+  panel is used; with none, the first focusable is still it. A watcher of your
+  own on `open` can't do this — the dialog's runs after yours and takes focus
+  back.
 - **Scroll lock** — `body` overflow is pinned while open and restored on close.
 - `role` + `aria-modal="true"`, with `aria-labelledby`/`aria-describedby`
   wired from `title`/`description`.

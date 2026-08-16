@@ -1,5 +1,58 @@
 # @surstromming/dialog
 
+## 0.1.4 — 2026-08-16
+
+### Fixed
+
+- **Closing from a keydown no longer clicks the opener.** Focus was handed back
+  to the opener synchronously, in the same microtask flush the closing keydown
+  was still being processed in — and the browser runs that key's default
+  action, activating whichever element is focused, *after* that flush. So Enter
+  in a field wired to close the dialog confirmed, returned focus, and then
+  clicked the button that opened it: the dialog blinked shut and open again.
+  Only with a real mouse click behind it — a synthetic `.click()` never focuses
+  the button, which is exactly how a scripted check misses it.
+
+  Focus now returns in a macrotask. By then the key's default action is spent,
+  and the panel is still in the DOM (the leave transition holds it), so focus
+  has not fallen to `body` in the gap. Consumers wiring Enter to a close should
+  still `preventDefault()` — that states the intent and covers the same ground
+  from the other side — but they no longer have to know to.
+
+- **A focus ring inside the body is no longer shaved off.** The body is a
+  `ScrollArea`, a scroller clips at its own padding edge, and a full-width
+  control inside one ends exactly on that edge — so the 3px ring `design.field`
+  paints *outside* the border box was cut flat on both sides. Measured in a
+  dialog with an `Input`: field and viewport both 741→1171, ring 738→1174.
+
+  The room had to go **inside** the scroller, so the slot content now sits in a
+  `div` with `spacing(1)` of padding and `.body` takes the same amount back off
+  its margin. Content lines up with the header and footer exactly as before;
+  the only visible difference is the scrollbar sitting 4px nearer the panel
+  edge. A negative margin on `.body` alone cannot do this — it would push the
+  content out of the very box that does the clipping.
+
+  **If you style the body's children from outside**, note the extra element:
+  `.body > *` now matches that wrapper, and a child asking for `height: 100%`
+  resolves against it (auto) rather than against the scroller.
+
+### Added
+
+- **`autofocus` inside the panel now decides where focus lands on open.**
+  Previously it was always the first focusable, which is the ✕ — so `Enter` on
+  a freshly opened dialog dismissed it instead of answering it, and a consumer
+  had no way to say otherwise (a parent watcher on `open` loses the race, since
+  the dialog's own runs after it).
+
+  ```vue
+  <Dialog v-model:open="open" title="Workspace directory">
+    <Input v-model="path" autofocus />
+  </Dialog>
+  ```
+
+  The first *visible* `[autofocus]` in the panel wins; with none, behaviour is
+  unchanged.
+
 ## 0.1.3 — 2026-08-04
 
 ### Fixed

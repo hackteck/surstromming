@@ -31,4 +31,6 @@ properties under `data-theme` on the root.
   styles must never `@use` it (or anything CSS-emitting — every SFC style
   block compiles separately and would duplicate it).
 - `layout($selector, $sidebarInset)` — `grid-template-areas` app shell over
-  semantic direct children `aside` / `header` / `main`.
+  semantic direct children `aside` / `header` / `main` / `footer`. The footer
+  is a full-width status bar row in both modes; any absent child collapses its
+  track, so a shell without one is unchanged.

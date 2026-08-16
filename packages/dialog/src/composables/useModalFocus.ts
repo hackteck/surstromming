@@ -45,6 +45,17 @@ export const useModalFocus = (
     )
   }
 
+  /**
+   * Where focus lands on open. The first focusable is usually the ✕, which is
+   * the wrong place to start a dialog that asks a question — `Enter` there
+   * dismisses it instead of answering it. A consumer marks the control it wants
+   * with `autofocus` and that wins; unmarked dialogs are unchanged.
+   */
+  const initialFocus = () => {
+    const marked = panel.value?.querySelectorAll<HTMLElement>('[autofocus]') ?? []
+    return [...marked].find((element) => element.offsetParent !== null) ?? focusables()[0]
+  }
+
   const trapTab = (event: KeyboardEvent) => {
     const items = focusables()
     if (!items.length) {
@@ -87,10 +98,21 @@ export const useModalFocus = (
       await nextTick()
       // The panel is `tabindex="-1"`, so it can take focus itself when it holds
       // nothing focusable — an alertdialog whose actions haven't rendered yet.
-      ;(focusables()[0] ?? panel.value)?.focus()
+      ;(initialFocus() ?? panel.value)?.focus()
     } else {
       unlock()
-      previouslyFocused?.focus()
+      // A macrotask, deliberately. A dialog often closes *from a keydown* —
+      // Enter in a field wired to confirm — and the browser runs that key's
+      // default action, activating whichever element is focused, only after
+      // the microtask flush this watcher runs in. Restoring focus
+      // synchronously put the opener button under that activation: Enter
+      // confirmed, focus returned, the same press clicked the opener, and the
+      // dialog blinked shut and open again. By the time a timeout runs the
+      // key's default action is spent; the panel is still in the DOM (the
+      // leave transition holds it), so focus has not fallen to `body` in the
+      // gap.
+      const opener = previouslyFocused
+      window.setTimeout(() => opener?.focus(), 0)
     }
   })
 

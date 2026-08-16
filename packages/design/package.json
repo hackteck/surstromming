@@ -1,6 +1,6 @@
 {
   "name": "@surstromming/design",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Everything related to design system, including colors, typography, and spacing.",
   "license": "MIT",
   "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",

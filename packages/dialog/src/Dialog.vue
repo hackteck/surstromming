@@ -40,7 +40,9 @@
           </div>
 
           <ScrollArea v-if="$slots.default" :class="$style.body">
-            <slot />
+            <div :class="$style.content">
+              <slot />
+            </div>
           </ScrollArea>
 
           <div v-if="$slots.footer" :class="$style.footer">
@@ -144,8 +146,23 @@ const $style = useCssModule()
 // Only the content scrolls — the header, the ✕ and the footer stay put. The
 // class lands on the ScrollArea's own root, which is already the column that
 // bounds itself; all it needs from the panel is permission to shrink.
+//
+// The negative margin is the other half of `.content`'s padding: it hands the
+// panel back exactly what the padding took, so the body still lines up with the
+// header and the footer.
 .body {
   min-height: 0; // a flex child only shrinks below its content with this
+  margin: design.spacing(-1);
+}
+
+// A focus ring is painted *outside* the control's border box — 3px of it — and
+// a scroller clips at its own padding edge, so a full-width field in a dialog
+// had its ring shaved flat on both sides (measured: field and viewport both
+// 741→1171, ring 738→1174). The room has to be *inside* the scroller, which is
+// why this is padding on a child and not a negative margin on `.body` itself —
+// that would only push the content out of the box doing the clipping.
+.content {
+  padding: design.spacing(1);
 }
 
 .close {
