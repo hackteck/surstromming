@@ -49,9 +49,15 @@ import { Plus } from 'lucide'
 
 ## Behavior
 
-- Shows after `delay` on `mouseenter`/`focusin`; hides **immediately** on
-  leave, blur or `Escape`. A pointer passing through never flashes it; the
-  pending timer is cancelled on the way out.
+- Shows after `delay` on `mouseenter`, and on `focusin` **only while the
+  trigger matches `:focus-visible`** — so the tip appears exactly when the focus
+  ring does. Hides **immediately** on leave, blur or `Escape`. A pointer passing
+  through never flashes it; the pending timer is cancelled on the way out.
+- **Focus that the browser doesn't draw doesn't show it either.** A dialog hands
+  focus back to the control that opened it, so a tooltipped opener used with the
+  mouse got a tip on the way back that nothing could dismiss — the pointer is
+  wherever the dialog's own ✕ was, so no `mouseleave` is coming for the trigger.
+  A keyboard user still gets the tip on the hand-back, along with the ring.
 - The tip is `pointer-events: none`, so it can't eat the hover it describes.
 - The tip **teleports to `<body>`** and is positioned `fixed` from the
   trigger's measured rect (`useAnchoredTip`), re-measured on scroll and resize.

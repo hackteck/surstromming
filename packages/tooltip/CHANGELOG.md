@@ -1,5 +1,29 @@
 # @surstromming/tooltip
 
+## 0.1.3 — 2026-08-16
+
+### Fixed
+
+- **A tip raised by a dialog closing could not be dismissed.** Any `focusin`
+  opened it, and a `Dialog` hands focus back to the control that opened it — so
+  clicking a tooltipped opener and then closing the dialog with the mouse left
+  the tip up for good: the pointer is wherever that dialog's ✕ was, so no
+  `mouseleave` was ever coming for the trigger. Only `Escape`, or moving focus
+  elsewhere, took it down.
+
+  Focus now shows the tip **only while the trigger matches `:focus-visible`**,
+  so it appears exactly when the focus ring does. Hover is unchanged, and a
+  keyboard user still gets the tip when the dialog hands focus back. Found by a
+  consumer (NanosecEditor). No API change.
+
+### Changed
+
+- **Focus shows a tip only when the browser is showing that focus.** A
+  programmatic `element.focus()` no longer raises one, which matters most in a
+  scripted check: a script's focus does not match `:focus-visible`, so drive the
+  keyboard path with a real `Tab` (CDP) rather than `element.focus()`, or the
+  tip you are asserting on will never appear.
+
 ## 0.1.2 — 2026-07-26
 
 ### Fixed

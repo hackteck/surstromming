@@ -4,7 +4,7 @@
     :class="$style.root"
     @mouseenter="show"
     @mouseleave="hide"
-    @focusin="show"
+    @focusin="showIfFocusVisible"
     @focusout="hide"
     @keydown.escape="hide"
   >
@@ -54,6 +54,17 @@ let timer: ReturnType<typeof setTimeout> | undefined
 const show = () => {
   clearTimeout(timer)
   timer = setTimeout(() => (open.value = true), props.delay)
+}
+
+// Focus alone is not a reason to show, because not all focus comes from the
+// keyboard. A dialog hands focus back to the control that opened it when it
+// closes, so clicking a tooltipped opener, then closing the dialog with the
+// mouse, showed a tip nothing could dismiss: the pointer is wherever that
+// dialog's control was, so no `mouseleave` is ever coming for the trigger.
+// `:focus-visible` is the browser's own answer to "am I showing this focus to
+// the user", so the tip now appears exactly when the focus ring does.
+const showIfFocusVisible = (event: FocusEvent) => {
+  if ((event.target as Element | null)?.matches(':focus-visible')) show()
 }
 
 // Hiding is immediate: a lingering tooltip over the wrong thing is worse than

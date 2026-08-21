@@ -1,6 +1,6 @@
 {
   "name": "@surstromming/tooltip",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A short label on hover or focus.",
   "license": "MIT",
   "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",

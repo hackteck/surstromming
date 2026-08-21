@@ -520,6 +520,13 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   policy, and the reason to draw it there is that the mechanism is where the
   hard-won cross-browser knowledge lives — fixing pinch-zoom in one copy and not
   the other is exactly what happened before the extraction.
+  It shows on hover, but on focus **only while the trigger matches
+  `:focus-visible`**. `Dialog` hands focus back to the control that opened it,
+  so a tooltipped opener clicked with the mouse got a tip on the hand-back that
+  nothing could dismiss — the pointer is wherever that dialog's ✕ was, so no
+  `mouseleave` is ever coming for the trigger. Letting the browser's own answer
+  decide means the tip appears exactly when the focus ring does; it's the same
+  predicate SidebarGroup's hover-reveal already leans on. Found by NanosecEditor.
 - `SidebarGroup`'s action menu passes `side` opposite the sidebar (`left`
   sidebar → menu opens `right`, toward the content; the flip is also what RTL
   will want) and `layer: 'menu'` — above the sidebar's rung, because the mobile
@@ -828,6 +835,10 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   a full-width status-bar row in both modes, collapsing to nothing when
   absent). Additive; nothing else moves.
   Both published 2026-08-16.
+  Eleventh: **tooltip → 0.1.3** (2026-08-16, a tip raised by a dialog handing
+  focus back that nothing could then dismiss — the focus path is gated on
+  `:focus-visible`). Found by NanosecEditor as well; tooltip has no dependents,
+  so nothing moves behind it. Published 2026-08-16.
   The earlier **"held back from npm"** note is spent — the registry is level
   with the repo, so `npm view <pkg> version` is the check before any bump.
   `npm run release` / `release:dry` must run **from the repo root** — invoked
