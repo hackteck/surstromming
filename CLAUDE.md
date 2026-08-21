@@ -867,7 +867,8 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   `tabindex="-1"` element as focusable — which in this component is always the
   body `ScrollArea`'s own step arrows, so every dialog with content opened with
   focus on one and trapped Tab on the wrong boundaries). Found by NanosecEditor
-  again; dialog has no dependents, so nothing moves behind it.
+  again; dialog has no dependents, so nothing moves behind it. Published
+  2026-08-21, alongside the twelfth's popover/select `0.1.6`.
   The earlier **"held back from npm"** note is spent — the registry is level
   with the repo, so `npm view <pkg> version` is the check before any bump.
   `npm run release` / `release:dry` must run **from the repo root** — invoked
