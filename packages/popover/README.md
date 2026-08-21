@@ -59,7 +59,7 @@ button, so it works with a `Button`, an input, or a whole toolbar.
 | Prop            | Type            | Default | Notes                                        |
 | --------------- | --------------- | ------- | -------------------------------------------- |
 | `v-model:open`  | `boolean`              | `false`  | The consumer owns the state                   |
-| `side`          | `bottom \| right \| left` | `bottom` | Which side of the trigger it opens on      |
+| `side`          | `top \| bottom \| right \| left` | `bottom` | Which side of the trigger it opens on      |
 | `align`         | `start \| end`         | `start`  | Which edge, along `side`, the panel lines up with |
 | `layer`         | `popover \| menu \| modal` | `popover` | Rung of the stacking ladder — a name, not a number |
 
@@ -88,8 +88,15 @@ div.root            // measured for the trigger's rect (no positioning of its ow
 - **Escape** closes it.
 - Document listeners (dismiss, and the scroll/resize re-measure) are attached
   only while open.
-- On `side: bottom` the panel is never narrower than the trigger (its width
-  becomes the panel's `min-width`); it scrolls past `spacing(72)`.
+- On `side: bottom` and `side: top` the panel is never narrower than the trigger
+  (its width becomes the panel's `min-width`); it scrolls past `spacing(96)` —
+  tall enough for a `Calendar`'s month grid, still a cap on a long list.
+- The `spacing(1)` gap to the trigger is a margin, so the token stays in CSS —
+  but only `margin-top` and `margin-left` can move the panel. It's placed
+  `position: fixed` at `top: 0; left: 0` and shifted by `transform`, so with
+  `bottom`/`right` left `auto` the browser absorbs the end margins into solving
+  for those edges and they move nothing. `top` and `left` therefore buy the gap
+  with a **negative** start margin, pulling the panel back off the trigger.
 
 ## Notes
 
@@ -105,6 +112,14 @@ div.root            // measured for the trigger's rect (no positioning of its ow
   A `Floating UI`-style *flip* is a different thing: a real dependency and a
   real API, and a menu that jumps to the other side of its trigger is more
   surprising than one that slides a few pixels. Not until something needs it.
+
+  Which is why **all four sides exist**. Not flipping is a policy about what the
+  panel does once placed; it is not a reason to leave a consumer unable to *say*
+  `top`. Without that, a trigger near the bottom of the screen — a Select in a
+  composer, a menu in a bottom toolbar — has its panel cut off by the viewport
+  with nowhere to send it. `side: top` is the mirror of `bottom` and adds no new
+  policy: same clamped alignment axis, same unclamped anchor axis, and the
+  panel's own height puts its lower edge against the trigger.
 - **The panel is clipped at the edges of the area its trigger is visible in**,
   so it slides *under* the app's chrome as you scroll instead of over it — the
   same thing a panel that wasn't teleported would do inside that scroll

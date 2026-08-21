@@ -418,12 +418,27 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   positions it `fixed`** from the trigger's measured rect — so no ancestor's
   `overflow` clips it (a menu opens cleanly out of the scrolling sidebar). The
   rect is re-measured on scroll (capture-phase, since any ancestor scrolling
-  moves the trigger) and resize; `side` (`bottom | right | left`) picks the
-  edge, `align` runs along it. Consequences the teleport forces: outside-click
+  moves the trigger) and resize; `side` (`top | bottom | right | left`) picks
+  the edge, `align` runs along it. **All four sides exist** because not flipping
+  is a policy about what the panel does once placed, not a reason to leave a
+  consumer unable to *say* `top` — a trigger at the foot of the screen (a Select
+  in a composer) otherwise has its panel cut off with nowhere to send it, and
+  `top` is `bottom`'s mirror with no new policy: same clamped alignment axis,
+  same unclamped anchor axis, the panel's own height putting its lower edge
+  against the trigger. `Select` forwards it, exactly like `layer`.
+  The `spacing(1)` gap stays a margin so the token stays in CSS, but only
+  `margin-top`/`margin-left` can move the panel: it is `fixed` at
+  `top: 0; left: 0` and shifted by `transform`, so with `bottom`/`right` left
+  `auto` the browser absorbs the end margins into solving for those edges and
+  they move nothing — which is why `side: left` shipped flush against its
+  trigger (measured 0.5px) until `top` was added and the same reasoning caught
+  it. Both buy the gap with a **negative** start margin.
+  Consequences the teleport forces: outside-click
   now tests the trigger *or* the panel (no longer nested); `z-index` is an
   inline style, not `v-bind()` (the panel doesn't descend from the trigger that
-  carries the custom property); and `side: bottom` copies the trigger width to
-  the panel's `min-width` in JS (CSS `100%` would resolve against the viewport).
+  carries the custom property); and `side: bottom`/`top` copy the trigger width
+  to the panel's `min-width` in JS (CSS `100%` would resolve against the
+  viewport).
   Placement lives in **`useAnchoredPosition`** (popover's `src/composables/`),
   leaving the component with dismissal and the template. It **shifts, never
   flips**, and only along the axis the *alignment* runs on (clamped to an 8px
@@ -839,6 +854,15 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   focus back that nothing could then dismiss — the focus path is gated on
   `:focus-visible`). Found by NanosecEditor as well; tooltip has no dependents,
   so nothing moves behind it. Published 2026-08-16.
+  Twelfth: **popover → 0.1.6 and select → 0.1.6** (2026-08-21, `side: 'top'`,
+  plus the gap `side: 'left'` never had). A new value on an existing prop is a
+  patch here, like `scroll-area@0.1.1`'s `orientation`. Select's range moves to
+  `^0.1.6` **with** the version — `top` is a value the older popover doesn't
+  know — while popover's other four dependents stay on `^0.1.5`: `caret`-ranges
+  already accept the new one, `DropdownMenuSide` is a plain alias of
+  `PopoverSide` so it widens on its own, and nothing there needed a floor.
+  `SelectDemo` gained an "Opens upward" field — the demo of a prop that only
+  looks like a no-op until the viewport runs out.
   The earlier **"held back from npm"** note is spent — the registry is level
   with the repo, so `npm view <pkg> version` is the check before any bump.
   `npm run release` / `release:dry` must run **from the repo root** — invoked

@@ -54,6 +54,15 @@ const fruits: SelectOption[] = [
 | `size`        | `sm \| md \| lg`  | `md`        | Heights match `Input` and `Button`      |
 | `disabled`    | `boolean`         | `false`     |                                         |
 | `layer`       | `popover \| menu \| modal` | `popover` | Rung of the stacking ladder — see below |
+| `side`        | `top \| bottom \| right \| left` | `bottom` | Which side the list opens on — see below |
+
+`side` is forwarded to [`Popover`](../popover) too, and it exists for one common
+place `bottom` is wrong: a Select near the **foot of the screen** — a composer,
+a bottom toolbar — opens its list into nothing and the options are clipped by
+the viewport. Popover places the panel where it is told and never flips, so
+`side="top"` is the fix rather than a heuristic; a component cannot know how
+much room is under it, and guessing from the DOM would be a lie the one time it
+guessed wrong.
 
 `layer` is forwarded to [`Popover`](../popover). `popover` (30) is right almost
 everywhere; a Select **inside a [`Dialog`](../dialog)** needs `modal`, or the

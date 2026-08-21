@@ -15,6 +15,11 @@ import type { PopoverAlign, PopoverSide } from '../index'
  * that one tracks the anchor, and clamping it would pin the panel to the top of
  * the screen while the thing it belongs to scrolls away underneath.
  *
+ * Which is exactly why all four sides have to exist. Not flipping is a policy
+ * about what the panel does once it is placed; it is not a reason to leave a
+ * consumer unable to *say* `top`, and without that a control near the foot of
+ * the screen has its panel cut off with no way out.
+ *
  * As the anchor scrolls away the panel goes with it and is **clipped** at the
  * edges of the area the anchor is visible in — the viewport narrowed by its
  * scrolling ancestors, each one only on the axis it actually scrolls. So it
@@ -105,13 +110,16 @@ export const useAnchoredPosition = (
     // position is ever applied.
     const base = { position: 'fixed', top: '0px', left: '0px' }
 
-    if (side === 'bottom') {
+    // The horizontal pair. `top` is the mirror of `bottom` and nothing else:
+    // the alignment axis is clamped, the anchor axis is not, and the panel's own
+    // height is what puts its lower edge against the trigger.
+    if (side === 'bottom' || side === 'top') {
       const start = align === 'start' ? rect.left : rect.right - panel.width
       const x = clamp(start, panel.width, bounds.left, bounds.right)
-      const y = rect.bottom
+      const y = side === 'bottom' ? rect.bottom : rect.top - panel.height
       return {
         ...base,
-        // `top` follows the anchor, all the way out.
+        // The anchor axis follows the trigger, all the way out.
         transform: `translate(${x}px, ${y}px)`,
         minWidth: `${rect.width}px`, // never narrower than what it's anchored to
         clipPath: clipPathFor(x, y, panel, bounds),

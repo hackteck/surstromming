@@ -1,5 +1,19 @@
 # @surstromming/select
 
+## 0.1.6 — 2026-08-21
+
+### Added
+
+- **A `side` prop, forwarded to `Popover`.** `Select` passed `layer` through and
+  nothing else, so a list that opened into the bottom of the viewport was cut
+  off and a consumer had no way to move it. Same prop, same reasoning as
+  `layer`: the component cannot know how much room is under it, and guessing
+  from the DOM would be a lie the one time it guessed wrong.
+
+  Needs `@surstromming/popover@^0.1.6` — the range moves with the version,
+  because `side: 'top'` is a value the older popover does not know. Additive
+  otherwise; the default is still `bottom`.
+
 ## 0.1.5 — 2026-08-04
 
 ### Added

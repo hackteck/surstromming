@@ -1,5 +1,5 @@
 <template>
-  <Popover v-model:open="open" :layer="layer">
+  <Popover v-model:open="open" :layer="layer" :side="side">
     <template #trigger>
       <button
         :class="triggerClasses"
@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useCssModule, useTemplateRef, watch } from 'vue'
 import { Icon } from '@surstromming/icon'
-import { Popover, type PopoverLayer } from '@surstromming/popover'
+import { Popover, type PopoverLayer, type PopoverSide } from '@surstromming/popover'
 import { Check, ChevronDown } from 'lucide'
 import type { SelectOption, SelectSize } from './index'
 
@@ -57,8 +57,19 @@ const props = withDefaults(
      * same reason, as DropdownMenu's.
      */
     layer?: PopoverLayer
+    /**
+     * Which side the list opens on. `bottom` is right almost always — and
+     * wrong in one common place: a Select near the **foot of the screen**, in a
+     * composer or a toolbar pinned to the bottom, opens its list into nothing
+     * and the options are cut off by the viewport. Popover places the panel on
+     * the side it was asked for and never flips, so this is the fix rather than
+     * a heuristic: a component cannot know how much room is under it at open
+     * time without measuring for it, and guessing from the DOM would be a lie
+     * the one time it guessed wrong. Same prop, same reasoning, as `layer`.
+     */
+    side?: PopoverSide
   }>(),
-  { placeholder: 'Select…', size: 'md', layer: 'popover' },
+  { placeholder: 'Select…', size: 'md', layer: 'popover', side: 'bottom' },
 )
 
 const model = defineModel<string>()

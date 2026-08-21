@@ -1,5 +1,36 @@
 # @surstromming/popover
 
+## 0.1.6 — 2026-08-21
+
+### Added
+
+- **`side: 'top'`.** The panel could open below, right or left of its trigger,
+  and not above it — so a trigger near the **bottom of the viewport** had its
+  panel cut off with nowhere to send it. Placement here deliberately shifts and
+  never flips, and the anchor axis is deliberately unclamped so the panel tracks
+  its trigger out of view rather than pinning itself to an edge; both are still
+  true. What was missing was the ability to *say* which side, for one of the
+  four sides.
+
+  `top` is the mirror of `bottom` and adds no new policy: the alignment axis is
+  clamped, the anchor axis is not, and the panel's own height puts its lower
+  edge against the trigger. The `spacing(1)` gap is a **negative `margin-top`**,
+  because the panel is `position: fixed` with `top: 0` and moved by `transform`
+  — `margin-bottom` on a box whose `bottom` is `auto` moves nothing.
+
+  Additive: every existing `side` behaves exactly as before, and the default is
+  still `bottom`. Found by NanosecEditor, whose model picker sits on the bottom
+  edge of a chat composer.
+
+### Fixed
+
+- **`side: 'left'` had no gap to its trigger** — the panel sat flush against it
+  (measured: 0.5px, where the other sides get `spacing(1)`). Same cause as the
+  note above, one side over: the gap is a margin, and on a box placed at
+  `left: 0` with `right: auto` the browser absorbs `margin-right` into solving
+  for the right edge, so it moves nothing. It's a negative `margin-left` now,
+  like `top`'s negative `margin-top`. `bottom` and `right` were always correct.
+
 ## 0.1.5 — 2026-08-04
 
 ### Fixed

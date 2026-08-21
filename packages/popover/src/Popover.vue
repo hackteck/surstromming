@@ -108,11 +108,24 @@ const classes = computed(() => [
   margin-top: design.spacing(1);
 }
 
-.side-right {
-  margin-left: design.spacing(1);
+/**
+ * A **negative** start margin, and it has to be: the panel is `position: fixed`
+ * with `top: 0; left: 0` and is moved by `transform`, so only `margin-top` and
+ * `margin-left` shift it. On a box whose `bottom`/`right` are `auto` the end
+ * margins are absorbed by solving for that edge and move nothing — measured:
+ * a `left` panel sat flush against its trigger, gap 0.5px. So the gap on those
+ * two sides is bought by pulling the panel back, not by pushing off its own
+ * far edge.
+ */
+.side-top {
+  margin-top: calc(-1 * design.spacing(1));
 }
 
 .side-left {
-  margin-right: design.spacing(1);
+  margin-left: calc(-1 * design.spacing(1));
+}
+
+.side-right {
+  margin-left: design.spacing(1);
 }
 </style>
