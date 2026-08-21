@@ -1,5 +1,44 @@
 # @surstromming/dialog
 
+## 0.1.5 — 2026-08-21
+
+### Fixed
+
+- **Focus no longer lands on a scrollbar arrow.** The focus trap's selector
+  guarded against a negative `tabindex` in only one of its clauses —
+  `[tabindex]:not([tabindex="-1"])` — so a `<button tabindex="-1">` matched the
+  earlier `button:not([disabled])` clause and came through anyway. An element
+  whose author had deliberately taken it out of the tab order was therefore
+  treated as being at the front of it.
+
+  It bites this component in particular because the body **is** a `ScrollArea`,
+  and each of its bars draws two step arrows carrying `tabindex="-1"` precisely
+  so that nothing treats them as controls. They sit ahead of the footer in DOM
+  order, so *every* dialog with body content had four phantom entries at the
+  head of its focus list. Two consequences, both measured in a consumer
+  (NanosecEditor), on an `alertdialog` asking whether to discard uncommitted
+  work:
+
+  - **Opening focused an arrow instead of the first control.** `Enter` on a
+    freshly opened dialog pressed a scroll step. `autofocus` — added in
+    `0.1.4` for exactly this class of problem — was the only way to avoid it,
+    and it should not have to be.
+  - **The Tab trap wrapped on the wrong elements.** The arrows were the first
+    and last "focusables", so `Shift+Tab` from the first real control went to
+    an arrow rather than to the last one.
+
+  The rule now lives in the filter rather than in the selector, and reads the
+  resolved `element.tabIndex` — 0 for a plain button, -1 for one taken out —
+  which covers every element type at once, and `tabindex="-2"` with them. After
+  the fix, in that same dialog: focus opens on `Cancel`, and `Shift+Tab` from
+  `Cancel` wraps to `Discard`.
+
+  No API change, and nothing to do in a consumer. A dialog that added
+  `autofocus` only to escape this keeps working exactly as it did — and
+  `autofocus` remains the right way to say which control should be the default,
+  which is worth doing on its own account wherever the first control is not the
+  safe one.
+
 ## 0.1.4 — 2026-08-16
 
 ### Fixed

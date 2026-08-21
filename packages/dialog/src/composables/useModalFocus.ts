@@ -1,7 +1,18 @@
 import { nextTick, onBeforeUnmount, watch, type Ref } from 'vue'
 
+/**
+ * Anything the browser would normally put in the tab order.
+ *
+ * The negative-`tabindex` guard is deliberately **not** in this selector. It
+ * used to be, written as `[tabindex]:not([tabindex="-1"])` — which only guards
+ * the one clause it is attached to. A `<button tabindex="-1">` matches
+ * `button:not([disabled])` and came through regardless, so an element whose
+ * author had explicitly taken it out of the tab order was treated as being at
+ * the front of it. The filter below is where the rule belongs, because it
+ * applies to every clause at once.
+ */
 const FOCUSABLE =
-  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]'
 
 // Counted, not a boolean: a dialog opened from inside another one would
 // otherwise hand the page's scroll back the moment *it* closed. The page's own
@@ -36,12 +47,21 @@ export const useModalFocus = (
   panel: Readonly<Ref<HTMLElement | null>>,
   open: Ref<boolean>,
 ) => {
-  // Recomputed per key press, so it tracks content that appears or disappears
-  // while the dialog is open.
+  /**
+   * Recomputed per key press, so it tracks content that appears or disappears
+   * while the dialog is open.
+   *
+   * `tabIndex >= 0` is the *resolved* value the browser would use — 0 for a
+   * plain button, -1 for one taken out of the order, and it covers `-2` and an
+   * unparseable value as well. Without it the body's own `ScrollArea` puts four
+   * step arrows at the head of this list: they carry `tabindex="-1"` precisely
+   * so nothing treats them as controls, and every dialog with a scrolling body
+   * opened with focus on one.
+   */
   const focusables = () => {
     if (!panel.value) return []
     return [...panel.value.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(
-      (element) => element.offsetParent !== null,
+      (element) => element.tabIndex >= 0 && element.offsetParent !== null,
     )
   }
 

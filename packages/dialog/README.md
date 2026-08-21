@@ -112,7 +112,11 @@ the header and the footer.
 ## Behavior & accessibility
 
 - **Focus trap** — opening moves focus to the first focusable inside (or the
-  panel); `Tab`/`Shift+Tab` cycle within and can't escape. Closing returns
+  panel); `Tab`/`Shift+Tab` cycle within and can't escape. *Focusable* means
+  what the browser would tab to: anything with a negative `tabindex` is skipped,
+  the body scroller's own step arrows included — they sit ahead of the footer in
+  the DOM, so before `0.1.5` every dialog with body content opened with focus on
+  one and wrapped Tab around them. Closing returns
   focus to whatever was focused before, so the keyboard user lands back where
   they left. The return is a macrotask behind the close: restored any sooner,
   the closing keydown's own default action — activating the focused element —
