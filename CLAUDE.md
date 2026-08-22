@@ -549,6 +549,43 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   trigger's hover-reveal can no longer use `:focus-within` (the menu it opens
   is teleported away): it's `:hover`/`:focus-visible` on the trigger plus an
   `isOpen` class the trigger slot exposes.
+- `DropdownMenu` has **submenus**, and the item type is what says so: a row
+  with `items` where an option has `value`. Nothing carries both — only a leaf
+  can be chosen, so a row that could be selected *and* opened would be one row
+  meaning two things — and `items` is the item type again, so a submenu holds
+  separators and further submenus with no depth limit to state. `select` still
+  fires with the leaf's `value` however deep, and the whole menu closes.
+  The panel moved out of `DropdownMenu.vue` into a private **`MenuPanel.vue`**
+  that renders **itself** for a submenu, inside another `Popover` on
+  `side="right" align="start"`. Reusing the shell rather than drawing a second
+  surface is the whole implementation: same border, shadow, placement and
+  teleport, and nothing in it knows how deep it is. `DropdownMenu` kept only
+  open/close and the focus hand-back — which now tests
+  `document.activeElement.closest('[role="menu"]')` rather than "is it inside
+  *my* panel", because a submenu is a panel of its own on `<body>`.
+  Three things the recursion forces. **`@mousedown.stop` on a nested panel**, or
+  nothing works at all: it is teleported to `<body>`, so to the menu above it a
+  press inside a submenu lands *outside*, and that menu would close on the press
+  and take this one with it before the click ever fired. **A hover grace
+  (240ms)** before a submenu closes: the panel is off to the right, so reaching
+  it means crossing the rows underneath, and closing on the first of them is
+  what makes a flyout feel like it is running away; entering the panel cancels
+  the pending close. And **the submenu row is `width: 100%`** — a plain row is a
+  flex item of the column and gets stretched, but a submenu's row sits inside
+  `Popover`'s own wrapper `div`, and a `<button>` in normal flow sizes to its
+  content: measured 117px in a 184px panel, highlight stopping short of the
+  others and the caret beside the label instead of at the edge.
+  Keys: `→` opens and steps in, `←` steps back out, `Escape` closes the **whole**
+  menu — `Popover` claims it in the capture phase and every open one answers, so
+  one press ends the stack; `←` is the key that peels one level. Opening by
+  pointer does not move focus, opening by key does (`autofocus` on the panel);
+  a row **opens, never toggles**, so the same hover doesn't mean two things.
+  The caret is an **inline `<svg>`**, like ScrollArea's — the arrow is the
+  component's furniture, not the consumer's, and taking it from lucide would
+  make the icon set a requirement for drawing a chevron.
+  `DropdownMenuItem` gained a third member, so reading `item.value` off a bare
+  one no longer type-checks without narrowing (`'separator' in item`,
+  `'items' in item`). Deliberately still absent: checkbox/radio items.
 - `Table` is presentational and data-driven: `columns` (`{ key, header, align? }`)
   + `rows` (records), `#cell-<key>` scoped slots as the escape hatch, attrs on
   the `<table>` (`inheritAttrs: false`) while the wrapper — a `ScrollArea` on
@@ -877,6 +914,13 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   outgrew: npm refuses a version that's already on the registry, so a release
   now names what moved — `npm publish -w @surstromming/scroll-area -w
   @surstromming/table`.
+  Fourteenth: **dropdown-menu → 0.1.7** (2026-08-22, submenus). A patch, like
+  every other additive change here, but the one whose changelog needed a
+  **Changed** section: widening `DropdownMenuItem` is additive at the value
+  level and breaking at the type level. Its one dependent, `sidebar-group`,
+  stays on `^0.1.6` — it passes the item array straight through to
+  `DropdownMenu` and never reads `value` off it, so it needs nothing from the
+  new version and the caret already accepts it. Published 2026-08-22.
 
 ## Data-driven components (the Vue way)
 

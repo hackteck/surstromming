@@ -1,6 +1,6 @@
 {
   "name": "@surstromming/dropdown-menu",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A menu of actions anchored to a trigger.",
   "license": "MIT",
   "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
