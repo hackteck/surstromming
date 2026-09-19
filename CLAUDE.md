@@ -921,6 +921,10 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   stays on `^0.1.6` — it passes the item array straight through to
   `DropdownMenu` and never reads `value` off it, so it needs nothing from the
   new version and the caret already accepts it. Published 2026-08-22.
+  Fifteenth: **button → 0.1.1** (2026-09-19, `as` typed `string | Component`,
+  so the README's own `:as="RouterLink"` passes `vue-tsc`). Types only — it
+  always rendered — so its four dependents stay on `^0.1.0`: none of them
+  passes `as` at all. Found by a consumer (BrainTrain). Published 2026-09-19.
 
 ## Data-driven components (the Vue way)
 

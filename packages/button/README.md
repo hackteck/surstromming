@@ -35,7 +35,7 @@ import { Plus } from 'lucide'
 | ---------- | ------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------ |
 | `variant`  | `primary \| secondary \| destructive \| outline \| ghost \| link`    | `primary`  | `ButtonVariant`                                                     |
 | `size`     | `sm \| md \| lg \| icon`                                             | `md`       | `ButtonSize`                                                        |
-| `as`       | `string`                                                             | `button`   | Any tag — `a`, `label`, `RouterLink`…                               |
+| `as`       | `string \| Component`                                                | `button`   | A tag (`a`, `label`…) or a component (`RouterLink`)                 |
 | `type`     | `button \| submit \| reset`                                          | `button`   | Emitted only when `as` is `button`                                  |
 | `disabled` | `boolean`                                                            | `false`    | Native `disabled` on a `button`, else `aria-disabled="true"`        |
 

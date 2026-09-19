@@ -12,13 +12,18 @@
 
 <script setup lang="ts">
 import { computed, useCssModule } from 'vue'
+import type { Component } from 'vue'
 import type { ButtonVariant, ButtonSize } from './index'
 
 const props = withDefaults(
   defineProps<{
     variant?: ButtonVariant
     size?: ButtonSize
-    as?: string
+    /**
+     * What to render. A tag name, or a component — `<component :is>` takes both,
+     * and the README documents `:as="RouterLink"`, which `string` alone rejected.
+     */
+    as?: string | Component
     /** Native button type (ignored when `as` is not a button). */
     type?: 'button' | 'submit' | 'reset'
     disabled?: boolean
