@@ -1,5 +1,22 @@
 # @surstromming/dialog
 
+## 0.1.6 — 2026-09-19
+
+### Fixed
+
+- **A dialog mounted already open behaves like one that was opened.** Focus
+  handling ran from a watcher on `open`, and a watcher hears changes, not the
+  value it starts with. A dialog whose `open` was `true` on its first render —
+  a game's rules shown on a first visit, in a consumer (BrainTrain) — therefore
+  never moved focus into its panel. Everything that depends on that went with
+  it: **Escape did nothing**, because it is heard on the panel; the **Tab trap
+  never engaged**, for the same reason; and the **page behind kept scrolling**,
+  because the scroll lock is taken on open.
+
+  The open path now also runs once on mount when the dialog starts open. No API
+  change, and nothing to do in a consumer. A consumer that worked around it by
+  flipping `open` to `true` after mounting can stop.
+
 ## 0.1.5 — 2026-08-21
 
 ### Fixed

@@ -1,4 +1,4 @@
-import { nextTick, onBeforeUnmount, watch, type Ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, watch, type Ref } from 'vue'
 
 /**
  * Anything the browser would normally put in the tab order.
@@ -111,29 +111,39 @@ export const useModalFocus = (
     releaseScrollLock()
   }
 
-  watch(open, async (isOpen) => {
-    if (isOpen) {
-      previouslyFocused = document.activeElement as HTMLElement
-      lock()
-      await nextTick()
-      // The panel is `tabindex="-1"`, so it can take focus itself when it holds
-      // nothing focusable — an alertdialog whose actions haven't rendered yet.
-      ;(initialFocus() ?? panel.value)?.focus()
-    } else {
-      unlock()
-      // A macrotask, deliberately. A dialog often closes *from a keydown* —
-      // Enter in a field wired to confirm — and the browser runs that key's
-      // default action, activating whichever element is focused, only after
-      // the microtask flush this watcher runs in. Restoring focus
-      // synchronously put the opener button under that activation: Enter
-      // confirmed, focus returned, the same press clicked the opener, and the
-      // dialog blinked shut and open again. By the time a timeout runs the
-      // key's default action is spent; the panel is still in the DOM (the
-      // leave transition holds it), so focus has not fallen to `body` in the
-      // gap.
-      const opener = previouslyFocused
-      window.setTimeout(() => opener?.focus(), 0)
-    }
+  const onOpen = async () => {
+    previouslyFocused = document.activeElement as HTMLElement
+    lock()
+    await nextTick()
+    // The panel is `tabindex="-1"`, so it can take focus itself when it holds
+    // nothing focusable — an alertdialog whose actions haven't rendered yet.
+    ;(initialFocus() ?? panel.value)?.focus()
+  }
+
+  const onClose = () => {
+    unlock()
+    // A macrotask, deliberately. A dialog often closes *from a keydown* —
+    // Enter in a field wired to confirm — and the browser runs that key's
+    // default action, activating whichever element is focused, only after
+    // the microtask flush this watcher runs in. Restoring focus
+    // synchronously put the opener button under that activation: Enter
+    // confirmed, focus returned, the same press clicked the opener, and the
+    // dialog blinked shut and open again. By the time a timeout runs the
+    // key's default action is spent; the panel is still in the DOM (the
+    // leave transition holds it), so focus has not fallen to `body` in the
+    // gap.
+    const opener = previouslyFocused
+    window.setTimeout(() => opener?.focus(), 0)
+  }
+
+  watch(open, (isOpen) => (isOpen ? onOpen() : onClose()))
+
+  // A dialog can be mounted already open — rules shown on a first visit — and
+  // a watcher only hears changes. Without this it never took focus, so Escape
+  // and the Tab trap, which listen on the panel, never heard a key, and the
+  // page behind it still scrolled.
+  onMounted(() => {
+    if (open.value) onOpen()
   })
 
   onBeforeUnmount(unlock)

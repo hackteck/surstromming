@@ -380,7 +380,13 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   the close happens in, so a synchronous return put the opener under that
   activation and Enter-to-confirm clicked it and reopened the dialog. Real
   mouse click behind it only; a synthetic `.click()` never focuses the button,
-  which is how a scripted check misses it. The body's slot
+  which is how a scripted check misses it. The open path also runs **from
+  `onMounted`**, as Popover's does: a dialog mounted with `open` already `true`
+  gives the watcher no change to hear, so it never took focus or the scroll
+  lock, and Escape and the Tab trap, both heard on the panel, did nothing. The
+  browser's own `autofocus` hides this on a document's first mount by focusing
+  the first `[autofocus]` inserted, but it does that once per document, so it
+  shows from the second mount on. The body's slot
   content sits in a **`div.content` with `spacing(1)` of padding**, and `.body`
   takes the same back off its margin: a scroller clips at its own padding edge
   and a full-width field ends exactly there, so `design.field`'s 3px ring was
@@ -925,6 +931,10 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   so the README's own `:as="RouterLink"` passes `vue-tsc`). Types only — it
   always rendered — so its four dependents stay on `^0.1.0`: none of them
   passes `as` at all. Found by a consumer (BrainTrain). Published 2026-09-19.
+  Sixteenth: **dialog → 0.1.6** (2026-09-19, a dialog mounted already open
+  never took focus, so Escape, the Tab trap and the scroll lock were all dead —
+  see Dialog above). Found by BrainTrain too; dialog has no dependents, so
+  nothing moves behind it. Published 2026-09-19, alongside button `0.1.1`.
 
 ## Data-driven components (the Vue way)
 
