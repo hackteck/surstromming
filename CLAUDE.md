@@ -980,6 +980,12 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   moves behind it. Asked for by Isometria's editor, which linked the package
   through a `workspaces` entry while it was built and dropped the link once
   it was published.
+  Eighteenth: **label → 0.1.1** (2026-10-17, a caption that wraps set its
+  lines touching at `line-height: 1`; now `1.25`, the half-leading given back
+  by `margin-block: -0.125em`, so a caption of one line of text takes exactly
+  the room it took and forms keep their rhythm). Found by Isometria's editor,
+  a Russian instruction above a field on a phone; label has no dependents,
+  so nothing moves behind it.
 
 ## Data-driven components (the Vue way)
 
