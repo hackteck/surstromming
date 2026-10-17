@@ -205,7 +205,7 @@ export const components: ComponentMeta[] = [
     name: 'Dialog',
     slug: 'dialog',
     category: 'Overlays',
-    description: 'A modal dialog — and alertdialog — with focus trap and scroll lock.',
+    description: 'A modal dialog — alertdialog and sheet too — with focus trap and scroll lock.',
     icon: AppWindow,
     demo: demo(() => import('@/pages/demo/components/DialogDemo.vue')),
   },

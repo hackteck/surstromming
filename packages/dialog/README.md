@@ -9,6 +9,12 @@ component:
   dismissal; the user must choose an action. This is shadcn's `AlertDialog`,
   folded in as a role rather than a second package.
 
+And two placements: in the middle of the screen, or flush with one of its
+edges as a **sheet** — a menu drawer on the left, details on the right, a
+phone's sheet from the bottom. That is shadcn's `Sheet`, folded in as `side`
+for the same reason: the focus trap, the scroll lock and the dismissal are the
+same modal's, and only where the panel sits differs.
+
 ## Dependency graph
 
 ```mermaid
@@ -50,6 +56,11 @@ graph LR
       <Button variant="destructive" @click="remove">Delete</Button>
     </template>
   </Dialog>
+
+  <!-- A menu drawer, its ✕ named in the app's language -->
+  <Dialog v-model:open="menu" side="left" title="Menu" close-label="Закрыть меню">
+    <nav>…</nav>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -68,11 +79,27 @@ import { Input } from '@surstromming/input'
 | `title`        | `string`                 | —                    | Wires `aria-labelledby`                          |
 | `description`  | `string`                 | —                    | Wires `aria-describedby`                         |
 | `role`         | `dialog \| alertdialog`  | `dialog`             | `alertdialog` removes dismissal                  |
+| `side`         | `center \| top \| right \| bottom \| left` | `center` | An edge makes it a sheet — see below    |
+| `closeLabel`   | `string`                 | `Close`              | The ✕'s accessible name, in the app's language   |
 
 Dismissal follows `role` — a `dialog` closes on ✕/Escape/outside click; an
 `alertdialog` has none of those (choose it deliberately, and give the footer a
 Cancel). There's no `dismissible` override: an absent boolean prop is `false`,
 not `undefined`, so it can't carry a role-dependent default without lying.
+
+### Sheets
+
+On an edge the panel runs the edge's length: full height on the left and the
+right, at most `spacing(80)` wide; full width at the top and the bottom, as
+tall as its content up to the screen less `spacing(8)`. It is square, and
+bordered only where it meets the page. It slides in from its edge while the
+overlay fades, and slides back out on close; reduced motion turns both off.
+The sheet's rules carry no more weight than the panel's own (`:where()`), so a
+`class` on the dialog sets a sheet's width exactly as it sets a dialog's.
+
+`closeLabel` is there because the ✕ is the component's, not the consumer's,
+and an English "Close" read out in a Russian interface is a label the app
+cannot fix from outside.
 
 ## Slots
 
@@ -94,7 +121,7 @@ already on that surface; the dialog just joins them.
 
 ```
 Backdrop                       // dim + blur, at `modal - 1`
-div.overlay                    // fixed, centers the panel; outside-click target
+div.overlay.side-*             // fixed, places the panel; outside-click target
   └─ div.panel[role]           // aria-modal, focus-trapped
        ├─ button.close         // ✕, dialog + dismissible only
        ├─ div.header           // title + description (or #header)
@@ -138,8 +165,8 @@ the header and the footer.
 
 ## Notes
 
-- No animation-aware unmount beyond a fade+scale `Transition`; the panel
-  unmounts when `open` is false.
+- No animation-aware unmount beyond a fade+scale `Transition` (a fade+slide on
+  an edge); the panel unmounts when `open` is false.
 - Scroll lock doesn't compensate for the scrollbar's width, so a page with a
   visible scrollbar can shift by a pixel or two on open. Fine for most apps;
   a `scrollbar-gutter` pass can come later if it matters.

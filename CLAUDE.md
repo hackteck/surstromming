@@ -393,6 +393,19 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   shaved flat on both sides. The room has to be *inside* the scroller — a
   negative margin on `.body` alone would push the content out of the box doing
   the clipping.
+  It folds shadcn's **Sheet** in the same way, as **`side`** (`center | top |
+  right | bottom | left`): the focus trap, the scroll lock and the dismissal
+  are the same modal's, and only where the panel sits differs. A `.side-*`
+  class on the overlay places it; on an edge the panel runs the edge's length,
+  square, bordered only where it meets the page, and those rules are written
+  under **`:where()`** so they weigh what `.panel` weighs — the class a
+  consumer passes still sets a sheet's width as it sets a dialog's, where a
+  descendant selector would have outweighed it. The panel slides while the
+  overlay fades: Transition times the leave by the overlay's own transition,
+  so the overlay keeps one and the slide is the panel's, the same 0.2s.
+  **`closeLabel`** names the ✕ (default `Close`): an app in another language
+  had no way to say it. Asked for by Isometria's editor, whose menu drawer is
+  the first sheet.
 - `useImageStatus(srcRef)` (avatar) preloads a src off-DOM and reports
   idle/loading/loaded/error, so the image shows only once ready — a broken src
   never flashes. Exported for reuse.

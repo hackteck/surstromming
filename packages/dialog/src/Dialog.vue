@@ -8,7 +8,7 @@
       :leave-active-class="$style.active"
     >
       <!-- The overlay catches an outside click; the panel stops it bubbling. -->
-      <div v-if="open" :class="$style.overlay" @mousedown.self="onOutside">
+      <div v-if="open" :class="overlayClasses" @mousedown.self="onOutside">
         <div
           ref="panel"
           v-bind="$attrs"
@@ -24,7 +24,7 @@
             v-if="showClose"
             :class="$style.close"
             type="button"
-            aria-label="Close"
+            :aria-label="closeLabel"
             @click="open = false"
           >
             <Icon :icon="X" :size="16" />
@@ -61,7 +61,7 @@ import { Icon } from '@surstromming/icon'
 import { ScrollArea } from '@surstromming/scroll-area'
 import { X } from 'lucide'
 import { useModalFocus } from './composables/useModalFocus'
-import type { DialogRole } from './index'
+import type { DialogRole, DialogSide } from './index'
 
 // Multi-node root (Backdrop + Teleport): attrs would be dropped, so `class`
 // never reached the panel and its width could not be overridden.
@@ -72,8 +72,11 @@ const props = withDefaults(
     title?: string
     description?: string
     role?: DialogRole
+    side?: DialogSide
+    /** The ✕'s accessible name, in the app's language. */
+    closeLabel?: string
   }>(),
-  { role: 'dialog' },
+  { role: 'dialog', side: 'center', closeLabel: 'Close' },
 )
 
 const open = defineModel<boolean>('open', { default: false })
@@ -108,6 +111,7 @@ const onKeydown = (event: KeyboardEvent) => {
 }
 
 const $style = useCssModule()
+const overlayClasses = computed(() => [$style.overlay, $style[`side-${props.side}`]])
 </script>
 
 <style module lang="scss">
@@ -121,6 +125,30 @@ const $style = useCssModule()
   align-items: center;
   justify-content: center;
   padding: design.spacing(4);
+}
+
+// On an edge the panel is a sheet, flush with that edge: the overlay stops
+// centring it and gives up its padding.
+.side-top {
+  align-items: flex-start;
+  padding: 0;
+}
+
+.side-right {
+  justify-content: flex-end;
+  align-items: stretch;
+  padding: 0;
+}
+
+.side-bottom {
+  align-items: flex-end;
+  padding: 0;
+}
+
+.side-left {
+  justify-content: flex-start;
+  align-items: stretch;
+  padding: 0;
 }
 
 .panel {
@@ -141,6 +169,38 @@ const $style = useCssModule()
   box-shadow: design.shadow(md);
   overflow: hidden; // the body scrolls, not the whole panel
   outline: none;
+}
+
+// A sheet runs the length of its edge, square, and bordered only where it
+// meets the page. `:where()` keeps these at `.panel`'s own weight, so a
+// consumer's class still sets a sheet's width as it sets a dialog's.
+:where(.side-left, .side-right) .panel {
+  max-width: design.spacing(80);
+  max-height: none;
+  border-block: none;
+  border-radius: 0;
+}
+
+:where(.side-top, .side-bottom) .panel {
+  max-width: none;
+  border-inline: none;
+  border-radius: 0;
+}
+
+:where(.side-top) .panel {
+  border-top: none;
+}
+
+:where(.side-right) .panel {
+  border-right: none;
+}
+
+:where(.side-bottom) .panel {
+  border-bottom: none;
+}
+
+:where(.side-left) .panel {
+  border-left: none;
 }
 
 // Only the content scrolls — the header, the ✕ and the footer stay put. The
@@ -214,14 +274,40 @@ const $style = useCssModule()
     transform 0.2s ease;
 }
 
+// A sheet slides in from its edge while the overlay round it fades: the fade
+// is what Transition times the leave by, so the two end together.
+.active .panel {
+  transition: transform 0.2s ease;
+}
+
 .enterFrom,
 .leaveTo {
   opacity: 0;
+}
+
+.side-center:is(.enterFrom, .leaveTo) {
   transform: scale(0.97);
 }
 
+.side-top:is(.enterFrom, .leaveTo) .panel {
+  transform: translateY(-100%);
+}
+
+.side-right:is(.enterFrom, .leaveTo) .panel {
+  transform: translateX(100%);
+}
+
+.side-bottom:is(.enterFrom, .leaveTo) .panel {
+  transform: translateY(100%);
+}
+
+.side-left:is(.enterFrom, .leaveTo) .panel {
+  transform: translateX(-100%);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .active {
+  .active,
+  .active .panel {
     transition: none;
   }
 }

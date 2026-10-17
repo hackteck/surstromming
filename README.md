@@ -115,7 +115,7 @@ See [`public/globals.css`](public/globals.css) for the full dark theme used by t
 | `@surstromming/checkbox` | Checkbox with a drawn box over a native input |
 | `@surstromming/combobox` | Select with a search field |
 | `@surstromming/custom-web-components` | Selected components compiled as framework-agnostic custom elements |
-| `@surstromming/dialog` | Modal dialog, with an alert-dialog mode |
+| `@surstromming/dialog` | Modal dialog, with an alert-dialog mode and sheets on the screen's edges |
 | `@surstromming/dropdown-menu` | A menu of actions anchored to a trigger |
 | `@surstromming/header` | App-shell header bar |
 | `@surstromming/icon` | Renders any Lucide icon as an inline SVG |
