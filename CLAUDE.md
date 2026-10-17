@@ -948,6 +948,12 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   never took focus, so Escape, the Tab trap and the scroll lock were all dead —
   see Dialog above). Found by BrainTrain too; dialog has no dependents, so
   nothing moves behind it. Published 2026-09-19, alongside button `0.1.1`.
+  Seventeenth: **dialog → 0.1.7** (2026-10-17, `side` and `closeLabel`: the
+  sheet folded in as a placement, and the ✕ named in the app's language). A
+  new prop is a patch here, as ever; dialog has no dependents, so nothing
+  moves behind it. Asked for by Isometria's editor, which linked the package
+  through a `workspaces` entry while it was built and dropped the link once
+  it was published.
 
 ## Data-driven components (the Vue way)
 

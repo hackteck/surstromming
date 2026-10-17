@@ -1,5 +1,23 @@
 # @surstromming/dialog
 
+## 0.1.7 — 2026-10-17
+
+### Added
+
+- **Sheets: `side`** (`center | top | right | bottom | left`, default
+  `center`). On an edge the panel is a sheet — shadcn's Sheet, folded in as a
+  placement the way AlertDialog was folded in as a role: flush with that edge
+  and as long as it, square, bordered only where it meets the page, sliding in
+  from it while the overlay fades. The focus trap, the scroll lock and the
+  dismissal are the dialog's own. A sheet on the left or the right is at most
+  `spacing(80)` wide; its rules weigh no more than the panel's own
+  (`:where()`), so a `class` on the dialog sets a sheet's width exactly as it
+  sets a dialog's.
+- **`closeLabel`** (default `Close`): the ✕'s accessible name, which an app in
+  another language had no way to set.
+
+Nothing changes for a dialog that passes neither.
+
 ## 0.1.6 — 2026-09-19
 
 ### Fixed

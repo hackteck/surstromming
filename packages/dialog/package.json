@@ -1,6 +1,6 @@
 {
   "name": "@surstromming/dialog",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Modal dialog, with an alert-dialog mode and sheets on the screen's edges.",
   "license": "MIT",
   "author": "Evgeniy Mnatsakanov <evgeniy.mnatsakanov@gmail.com>",
