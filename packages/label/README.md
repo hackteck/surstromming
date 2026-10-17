@@ -59,8 +59,12 @@ label.root    // flex row, gap, text-sm, medium, non-selectable
 
 Inherits its color (`foreground` via the reset) — no color of its own, so it
 reads correctly inside any surface. `font-size: 0.875rem`, `font-weight: 500`,
-`line-height: 1`, `gap: spacing(2)`, `user-select: none` (a double-click on a
-caption should focus the field, not select the word).
+`gap: spacing(2)`, `user-select: none` (a double-click on a caption should
+focus the field, not select the word). `line-height: 1.25` with
+`margin-block: -0.125em`: a caption that wraps has room between its lines,
+and one of a single line of text takes exactly the room `line-height: 1`
+gave it, so a form keeps its rhythm. A line beside something taller than its
+text, an icon or a checkbox, takes up to 3.5 px less than it did.
 
 ## Accessibility
 
