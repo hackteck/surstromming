@@ -257,7 +257,7 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   radio-group, slider, popover, select, combobox, accordion, breadcrumb, tabs,
   alert, toast, progress, badge, separator, card, avatar, tooltip,
   dropdown-menu, dialog, custom-web-components, table, pagination, data-table,
-  scroll-area, calendar, date-picker, chart, button-group.
+  scroll-area, calendar, date-picker, chart, button-group, sortable-list.
   **Not on the docs site** (no `*Demo.vue`, no registry entry, README only):
   icon, label, popover, backdrop, sidebar, sidebar-group, header. The last four
   are demonstrated *by the app shell itself*, and Popover by everything built on
@@ -772,6 +772,32 @@ const classes = computed(() => [$style.root, $style[`variant-${props.variant}`]]
   whichever package's CSS was injected last. Deliberately absent: shadcn's
   `ButtonGroupText`/`ButtonGroupSeparator` (a `<span>` and the existing
   `Separator`) and any selected state — that's `Tabs` or a toggle group.
+- `SortableList` is **controlled**: it never reorders its own `items`. A row
+  let go somewhere new emits `move(value, to)` — `to` its index in the new
+  order — and the consumer puts its data in order, or refuses, and hands the
+  items back. Asked for by Isometria's editor, whose storeys are reordered in
+  its engine, a frame away. Rows are carried by a **handle** only (an inline
+  six-dot `<svg>`, the component's furniture, as ScrollArea's carets are), so
+  on a touch screen the rest of a row still scrolls; the handle is
+  `touch-action: none`, captures the pointer, and is an icon button's square,
+  `spacing(9)`, since a finger that misses it lands on the label and chooses
+  the row. Every row is measured as the drag starts, and the carried row goes
+  to the place whose slot its middle is nearest, so a row of its height
+  slides aside once it is half way in, not only once it is covered, and rows
+  of any height work; the others slide aside by the carried row's height plus
+  the gap. The carried row is edged as well as shadowed, as the overlays are,
+  by a ring that keeps its size: on a dark panel a shadow alone was lost
+  (Isometria's editor, looked at on an iPad's size, 2026-10-17). **Let go,
+  the rows hold the dropped arrangement** until the next `items` arrive, so
+  nothing flashes back to the old order in the frame before the consumer's
+  answer; none within half a second is a refusal, and the rows go back.
+  `lostpointercapture` follows every `pointerup`, so it puts a row back only
+  while it is still carried, never one already let go. The arrow keys on a
+  focused handle move a row one place, and the handle is focused again after
+  the consumer's update, since a node Vue moves loses the focus. Escape while
+  carrying puts the row back and stops there, so a dialog round the list does
+  not close with it. Deliberately absent: scrolling while carrying, dragging
+  between lists.
 - `Pagination` **reuses `Button`** (`ghost` pages/chevrons, `outline` current,
   all `size="icon"`) — unlike the sidebar rows, pagination is exactly Button's
   existing paint. Plain `v-model` (1-based page) + `pageCount`; `≤ 1` renders

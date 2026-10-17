@@ -129,6 +129,7 @@ See [`public/globals.css`](public/globals.css) for the full dark theme used by t
 | `@surstromming/sidebar` | Responsive sidebar: collapsible panel on desktop, drawer on mobile |
 | `@surstromming/sidebar-group` | A labelled group of sidebar navigation, rendered from data |
 | `@surstromming/slider` | Pick a number from a range |
+| `@surstromming/sortable-list` | A list put in order by dragging its rows |
 | `@surstromming/spinner` | Spinning loading indicator |
 | `@surstromming/switch` | On/off switch over a native checkbox |
 | `@surstromming/tabs` | Switch between panels of content |

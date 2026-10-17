@@ -29,6 +29,7 @@
       <DataTableDemo />
       <ChartDemo />
       <ScrollAreaDemo />
+      <SortableListDemo />
       <AlertDemo />
       <ToastDemo />
       <BadgeDemo />
@@ -64,6 +65,7 @@ import ScrollAreaDemo from "./components/ScrollAreaDemo.vue";
 import SelectDemo from "./components/SelectDemo.vue";
 import SeparatorDemo from "./components/SeparatorDemo.vue";
 import SliderDemo from "./components/SliderDemo.vue";
+import SortableListDemo from "./components/SortableListDemo.vue";
 import SpinnerDemo from "./components/SpinnerDemo.vue";
 import SwitchDemo from "./components/SwitchDemo.vue";
 import TableDemo from "./components/TableDemo.vue";

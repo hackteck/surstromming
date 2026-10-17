@@ -11,6 +11,7 @@ import {
   CircleDot,
   CircleUser,
   Gauge,
+  GripVertical,
   Group,
   LoaderCircle,
   Menu,
@@ -258,6 +259,14 @@ export const components: ComponentMeta[] = [
     description: 'A scroll container that paints its own scrollbar instead of the native one.',
     icon: Scroll,
     demo: demo(() => import('@/pages/demo/components/ScrollAreaDemo.vue')),
+  },
+  {
+    name: 'SortableList',
+    slug: 'sortable-list',
+    category: 'Data display',
+    description: 'A list put in order by dragging its rows, or with the arrow keys.',
+    icon: GripVertical,
+    demo: demo(() => import('@/pages/demo/components/SortableListDemo.vue')),
   },
   {
     name: 'Accordion',
